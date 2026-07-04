@@ -520,30 +520,33 @@ public class PotholeCaptureManager : MonoBehaviour
 
             Debug.Log($"<color=orange>[Capture] Objects Found - Potholes: {potholes.Length}, Crocodiles: {crocodiles.Length}, Cracks: {rajaduras.Length}, Persons: {persons.Length}, Cars: {tagObjs.Length}</color>");
 
-            // Procesar baches normales (clase 0)
+            // Unified dataset class order:
+            // 0=Crocodile Crack, 1=Single Crack, 2=Pothole, 3=Person, 4=Car.
+
+            // Procesar baches normales (clase 2)
             foreach (var pothole in potholes)
             {
-                var boxInfo = GetBoundingBoxInfo(pothole, 0, "Bache", colorPothole);
+                var boxInfo = GetBoundingBoxInfo(pothole, 2, "Bache", colorPothole);
                 if (boxInfo.HasValue)
                 {
                     boxes.Add(boxInfo.Value);
                 }
             }
 
-            // Procesar cocodrilos (clase 1)
+            // Procesar cocodrilos (clase 0)
             foreach (var croc in crocodiles)
             {
-                var boxInfo = GetBoundingBoxInfo(croc, 1, "Cocodrilo", colorCrocodile);
+                var boxInfo = GetBoundingBoxInfo(croc, 0, "Cocodrilo", colorCrocodile);
                 if (boxInfo.HasValue)
                 {
                     boxes.Add(boxInfo.Value);
                 }
             }
 
-            // Procesar rajaduras (clase 2)
+            // Procesar rajaduras (clase 1)
             foreach (var raj in rajaduras)
             {
-                var boxInfo = GetBoundingBoxInfo(raj, 2, "Crack", colorRajadura);
+                var boxInfo = GetBoundingBoxInfo(raj, 1, "Crack", colorRajadura);
                 if (boxInfo.HasValue)
                 {
                     boxes.Add(boxInfo.Value);
@@ -1451,4 +1454,3 @@ public class PotholeCaptureManager : MonoBehaviour
         return union > 0 ? intersection / union : 0f;
     }
 }
-

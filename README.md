@@ -19,18 +19,20 @@ Yamil Uchani, Grace Abigail Luna Verdueta, Mauricio Figueroa, and Edwin Salcedo
 
 ## Menu
 
-- [Introduction](#introduction)
-- [Quick Start](#quick-start)
-- [Data](#data)
-- [Perception Model](#perception-model)
-- [Recovery Strategy Experiments](#recovery-strategy-experiments)
-- [Test Automator](#test-automator)
-- [System Hardware Requirements](#system-hardware-requirements)
-- [Related Resources](#related-resources)
-- [Cite Our Work](#cite-our-work)
-- [License](#license)
+- [1. Introduction](#1-introduction)
+- [2. Quick Start](#2-quick-start)
+- [3. Data](#3-data)
+- [4. Perception Model](#4-perception-model)
+- [5. Recovery Strategy Experiments](#5-recovery-strategy-experiments)
+- [6. Test Automator](#6-test-automator)
+- [7. Results](#7-results)
+- [8. System Hardware Requirements](#8-system-hardware-requirements)
+- [9. Related Resources](#9-related-resources)
+- [10. Acknowledgements](#10-acknowledgements)
+- [11. Cite Our Work](#11-cite-our-work)
+- [12. Licence](#12-licence)
 
-## Introduction
+## 1. Introduction
 
 This repository contains the Unity digital twin simulator and Python inference server for UAV-based pavement monitoring without lane closure. The simulator provides a controlled environment for testing how an autonomous UAV inspects road segments when vehicles and pedestrians temporarily occlude the road surface.
 
@@ -67,13 +69,14 @@ RDMO-DigitalTwin/
 |   |-- model_base.pt          # Baseline checkpoint
 |   `-- model_finetuned.pt     # Deployed checkpoint for the simulator server
 |-- data/                      # Downloaded datasets; ignored by Git
+|-- results/                   # UAV recovery-strategy results and CSV exports
 `-- unity/
     |-- Assets/
     |-- Packages/
     `-- ProjectSettings/
 ```
 
-## Quick Start
+## 2. Quick Start
 
 ### 1. Open the Unity project
 
@@ -94,7 +97,7 @@ The main scenes are registered in `unity/ProjectSettings/EditorBuildSettings.ass
 | Scene | Purpose |
 | --- | --- |
 | `Assets/Scenes/Mode_Menu.unity` | Entry scene for launching simulator modes. |
-| `Assets/Scenes/Mode_Load.unity` | Loading and initialization scene. |
+| `Assets/Scenes/Mode_Load.unity` | Loading and initialisation scene. |
 | `Assets/Scenes/Mode_Model.unity` | Interactive visual simulation. |
 | `Assets/Scenes/Mode_Data.unity` | Batch experiment and data mode. |
 | `Assets/Scenes/Mode_Capture.unity` | Dataset capture mode. |
@@ -187,15 +190,9 @@ python unity/Assets/Scripts/AI/api_model_pt.py
 
 For direct testing, open one of the scene files listed above and press Play.
 
-## Data
+## 3. Data
 
-The datasets described in the paper are available from Google Drive:
-
-```text
-https://drive.google.com/drive/folders/1bfLm6uia9jM-xPxxl2PxLrq3OVG0Z8TZ?usp=sharing
-```
-
-The repository keeps `data/` out of Git because the datasets are large. Download the datasets from the link above and extract them under the repository root so the expected layout is:
+The datasets described in the paper are available from [Google Drive](https://drive.google.com/drive/folders/1bfLm6uia9jM-xPxxl2PxLrq3OVG0Z8TZ?usp=sharing). Download the datasets and extract them under the repository root so the expected layout is:
 
 ```text
 data/
@@ -220,7 +217,7 @@ data/
 
 | Folder | Paper name | Purpose | Paper statistics |
 | --- | --- | --- | --- |
-| `merged_dataset` | Merged Dataset | Normalized five-class dataset assembled from the source road-damage and UAV traffic datasets before balancing. | 18,741 images, including 17,938 annotated images and 803 backgrounds; 71,034 boxes. |
+| `merged_dataset` | Merged Dataset | Normalised five-class dataset assembled from the source road-damage and UAV traffic datasets before balancing. | 18,741 images, including 17,938 annotated images and 803 backgrounds; 71,034 boxes. |
 | `augmented_dataset` | Balanced Dataset | Class-balanced and augmented real-image dataset used for the first model-development stage. | 46,175 images, including 42,755 annotated images and 3,420 backgrounds; 120,769 boxes. |
 | `synthetic_dataset` | Synthetic Dataset | Unity-captured target-domain dataset used for simulator-domain fine-tuning and evaluation. | 2,235 images; 25,943 boxes. |
 
@@ -247,7 +244,7 @@ The Unity digital twin generates UAV-view road scenes with:
 
 ### Model-development data
 
-For the perception model, the paper normalizes road-damage annotations from multiple datasets into a common five-class taxonomy:
+For the perception model, the paper normalises road-damage annotations from multiple datasets into a common five-class taxonomy:
 
 | Final class | Role in the simulator |
 | --- | --- |
@@ -263,27 +260,17 @@ The full raw training datasets are not required to run the deployed simulator. T
 
 ### Class Order
 
-`merged_dataset` and `augmented_dataset` use the class order stored in their YAML files:
+All dataset YAML files use the same five-class mapping:
 
 | ID | Class |
 | ---: | --- |
-| 0 | `Crocodile Cracks` |
-| 1 | `Single Cracks` |
-| 2 | `Potholes` |
+| 0 | `Crocodile Crack` |
+| 1 | `Single Crack` |
+| 2 | `Pothole` |
 | 3 | `Person` |
 | 4 | `Car` |
 
-`synthetic_dataset` follows the Unity capture export order:
-
-| ID | Class |
-| ---: | --- |
-| 0 | `Pothole` |
-| 1 | `Crocodile Crack` |
-| 2 | `Single Crack` |
-| 3 | `Person` |
-| 4 | `Car` |
-
-Be careful when mixing the real-image and synthetic datasets: the first three class IDs are ordered differently. The Python training/evaluation code should read the appropriate dataset YAML rather than assuming a shared class-index order.
+The Unity capture exporter has been aligned with this mapping, so newly captured synthetic samples and the provided synthetic dataset use the same class IDs as the real-image datasets.
 
 ### Reproducibility Notes
 
@@ -293,7 +280,7 @@ Be careful when mixing the real-image and synthetic datasets: the first three cl
 - Use `data/synthetic_dataset/dataset.yaml` for the simulator-domain stage.
 - If you redistribute derived datasets, cite the arXiv preprint and the original public datasets listed in the paper.
 
-## Perception Model
+## 4. Perception Model
 
 <p align="center">
   <img src="assets/images/multitask-model.png" width="100%" alt="Shared-backbone multitask YOLOv8n perception model" />
@@ -327,9 +314,9 @@ The arXiv preprint reports that the full simulator perception pipeline achieved 
   <img src="assets/images/confusion-matrix.png" width="58%" alt="Fine-tuned multitask perception model confusion matrix" />
 </p>
 
-## Recovery Strategy Experiments
+## 5. Recovery Strategy Experiments
 
-The digital twin evaluates UAV inspection behavior under occlusion. At each time step, it tracks the road segments, dynamic traffic agents, UAV state, inspection memory, and available recovery policies. When the target road segment becomes insufficiently visible, the simulator can trigger a recovery strategy.
+The digital twin evaluates UAV inspection behaviour under occlusion. At each time step, it tracks the road segments, dynamic traffic agents, UAV state, inspection memory, and available recovery policies. When the target road segment becomes insufficiently visible, the simulator can trigger a recovery strategy.
 
 | ID | Strategy | Action |
 | ---: | --- | --- |
@@ -354,7 +341,7 @@ The full batch covers:
 
 The arXiv preprint reports that flight altitude strongly affects inspection coverage and that adaptive recovery improves performance under occlusion. In the reported experiments, hover-and-recheck provides the most consistent coverage under medium and high traffic conditions, while skip-and-revisit is most effective in low-traffic scenarios.
 
-## Test Automator
+## 6. Test Automator
 
 The batch experiment automator is attached to the `DigitalTwinManager` object in:
 
@@ -400,7 +387,20 @@ Important files:
 | `Ep*_Seg*_*.csv` | Per-segment details. |
 | `Episode_*_*.csv` | Per-episode segment details. |
 
-## System Hardware Requirements
+## 7. Results
+
+The `results/` folder contains the UAV recovery-strategy results used for sharing and post-processing.
+
+| File | Contents |
+| --- | --- |
+| `results/results.xlsx` | Original Excel workbook containing the UAV testing results. |
+| `results/uav_segment_results.csv` | Clean CSV export of the detailed per-segment table. It contains 720 rows, corresponding to 36 experiment configurations x 20 segment-level entries. |
+| `results/uav_summary_results.csv` | Clean CSV export of the summary table. It contains 36 rows, one for each traffic-altitude-strategy configuration. |
+| `results/uav_results.csv` | Full-sheet CSV export that preserves the original side-by-side workbook layout. |
+
+For most reproducibility use cases, prefer `uav_segment_results.csv` for detailed analysis and `uav_summary_results.csv` for recreating paper-style tables. The summary CSV reports coverage, recovery, energy, and mission time as mean +/- standard deviation.
+
+## 8. System Hardware Requirements
 
 ### Simulator
 
@@ -416,11 +416,13 @@ Important files:
 
 The experiments reported in the paper were run on a desktop with an AMD Ryzen 5 5600G CPU, NVIDIA GeForce GTX 1050 Ti GPU with 4 GB VRAM, and 16 GB RAM. Detector FPS comparisons were measured on an NVIDIA T4 GPU.
 
-## Related Resources
+## 9. Related Resources
 
 - arXiv preprint: <https://arxiv.org/abs/2606.20742>
 - arXiv PDF: <https://arxiv.org/pdf/2606.20742>
 - Dataset folder: <https://drive.google.com/drive/folders/1bfLm6uia9jM-xPxxl2PxLrq3OVG0Z8TZ?usp=sharing>
+- `results/results.xlsx`: original UAV testing workbook.
+- `results/uav_segment_results.csv` and `results/uav_summary_results.csv`: CSV exports for sharing and analysis.
 - `docs/paper.pdf`: local paper PDF/reference copy.
 - `docs/MODEL_CARD.md`: historical notes about the multitask model.
 - `docs/DEPLOYMENT.md`: historical deployment notes from earlier repository layouts.
@@ -429,11 +431,11 @@ The experiments reported in the paper were run on a desktop with an AMD Ryzen 5 
 
 The paper also discusses the public road-damage and UAV-view traffic datasets used to construct the training data, including HighRPD, RDD2022, UAV-PDD2023, UAPD, PothRGBD, and UAV car/pedestrian datasets.
 
-## Acknowledgements
+## 10. Acknowledgements
 
 This project builds on Unity, Blender, PyTorch, TorchVision, Ultralytics YOLO, Albumentations, FastAPI, and OpenCV. The perception model and evaluation protocol also depend on public pavement-distress and UAV-view traffic datasets cited in the arXiv preprint.
 
-## Cite Our Work
+## 11. Cite Our Work
 
 If you use this simulator, model, or experiment automator in your research, please cite the associated paper:
 
@@ -450,6 +452,6 @@ If you use this simulator, model, or experiment automator in your research, plea
 }
 ```
 
-## License
+## 12. Licence
 
 This repository is released under the [MIT License](LICENSE.md).
