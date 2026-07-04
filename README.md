@@ -13,13 +13,26 @@ Yamil Uchani, Grace Abigail Luna Verdueta, Mauricio Figueroa, and Edwin Salcedo
 [![Datasets](https://img.shields.io/badge/Datasets-Google%20Drive-grey?labelColor=34A853&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1bfLm6uia9jM-xPxxl2PxLrq3OVG0Z8TZ?usp=sharing)
 [![Repository](https://img.shields.io/badge/GitHub-RDMO--DigitalTwin-grey?labelColor=181717&logo=github&logoColor=white)](https://github.com/EdwinTSalcedo/RDMO-DigitalTwin)
 
+<p align="center">
+  <img src="assets/images/droneview.png" width="92%" alt="Unity digital twin simulator map view with traffic agents and an inspection segment" />
+</p>
+
+## Menu
+
+- [Introduction](#introduction)
+- [Quick Start](#quick-start)
+- [Data](#data)
+- [Perception Model](#perception-model)
+- [Recovery Strategy Experiments](#recovery-strategy-experiments)
+- [Test Automator](#test-automator)
+- [System Hardware Requirements](#system-hardware-requirements)
+- [Related Resources](#related-resources)
+- [Cite Our Work](#cite-our-work)
+- [License](#license)
+
 ## Introduction
 
 This repository contains the Unity digital twin simulator and Python inference server for UAV-based pavement monitoring without lane closure. The simulator provides a controlled environment for testing how an autonomous UAV inspects road segments when vehicles and pedestrians temporarily occlude the road surface.
-
-<p align="center">
-  <img src="assets/images/simulator-map.png" width="92%" alt="Unity digital twin simulator map view with traffic agents and an inspection segment" />
-</p>
 
 The framework integrates:
 
