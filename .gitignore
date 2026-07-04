@@ -1,0 +1,123 @@
+# ============================================
+# RDMO Digital Twin - repository .gitignore
+# ============================================
+
+# ======================
+# macOS / Windows system files
+# ======================
+.DS_Store
+**/.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+~$*.doc
+~$*.docx
+
+# ======================
+# Local editor and IDE state
+# ======================
+.idea/
+.vscode/
+.vs/
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.suo
+*.tmp
+*.bak
+
+# ======================
+# Python local environment and caches
+# ======================
+.venv/
+venv/
+env/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ======================
+# Unity editor caches and generated folders
+# ======================
+unity/Library/
+unity/Temp/
+unity/Logs/
+unity/obj/
+unity/UserSettings/
+unity/MemoryCaptures/
+unity/Recordings/
+unity/Build/
+unity/Builds/
+unity/[Bb]uild/
+unity/[Bb]uilds/
+
+# ======================
+# Unity generated project files
+# ======================
+unity/*.csproj
+unity/*.sln
+unity/*.slnx
+unity/*.unityproj
+unity/*.pidb
+unity/*.svd
+
+# ======================
+# Unity auto-recovery and local tooling
+# ======================
+unity/Assets/_Recovery/
+unity/.agents/
+unity/.vsconfig
+
+# ======================
+# Simulator-generated outputs
+# ======================
+unity/DigitalTwin_Logs/
+unity/Assets/DigitalTwin_Logs/
+unity/**/*.csv
+unity/**/*.log
+unity/Assets/Scripts/AI/Detecciones_IA/
+unity/Assets/Scripts/AI/Detecciones IA/
+unity/Assets/Scripts/AI/Detecciones_model_pt/
+unity/Assets/Scripts/AI/debug_crops/
+unity/Assets/Scripts/AI/runs/
+unity/Assets/Scripts/AI/imagen*.jpg
+unity/Assets/Scripts/AI/resultado_*.jpg
+
+# ======================
+# Unity-side model binaries and generated AI artifacts
+# The deployed checkpoints live in root models/ and are intentionally trackable.
+# ======================
+unity/Assets/Scripts/AI/*.pt
+unity/Assets/Scripts/AI/*.pth
+unity/Assets/Scripts/AI/*.onnx
+
+# ======================
+# Experiment/training artifacts outside the Unity project
+# ======================
+data/
+experiments/runs/
+runs/
+wandb/
+mlruns/
+
+# ======================
+# Backup copies not intended for GitHub
+# ======================
+unity-backup/
+
+# ======================
+# Keep important repository documentation and deployed model artifacts trackable
+# ======================
+!README.md
+!unity/README.md
+!docs/**/*.md
+!models/
+!models/model_base.pt
+!models/model_finetuned.pt
