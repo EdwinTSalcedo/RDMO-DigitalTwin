@@ -1,10 +1,10 @@
 <p>
   <h1>
-    A Digital Twin Framework for Traffic-Aware UAV Pavement Monitoring without Lane Closure
+    A Digital Twin Framework for Traffic-Aware UAV Pavement Monitoring in Open-Traffic Conditions 🛣️ 
   </h1>
 </p>
 
-Yamil Uchani, Grace Abigail Luna Verdueta, Mauricio Figueroa, and Edwin Salcedo
+[Yamil Uchani](https://www.linkedin.com/in/yamiluchani/), [Grace Luna](https://www.linkedin.com/in/grace-luna-verdueta/), [Edwin Salcedo](https://www.linkedin.com/in/edwinsalcedo/), and [Mauricio Figueroa](https://www.linkedin.com/in/mau-figue/)
 
 [![arXiv](https://img.shields.io/badge/arXiv-2606.20742-grey?labelColor=B31B1B&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2606.20742)
 [![Paper PDF](https://img.shields.io/badge/Paper-PDF-grey?labelColor=B31B1B&logo=adobeacrobatreader&logoColor=white)](https://arxiv.org/pdf/2606.20742)
@@ -19,22 +19,18 @@ Yamil Uchani, Grace Abigail Luna Verdueta, Mauricio Figueroa, and Edwin Salcedo
 
 ## Menu
 
-- [1. Introduction](#1-introduction)
-- [2. Quick Start](#2-quick-start)
-- [3. Data](#3-data)
-- [4. Perception Model](#4-perception-model)
-- [5. Recovery Strategy Experiments](#5-recovery-strategy-experiments)
-- [6. Test Automator](#6-test-automator)
-- [7. Results](#7-results)
-- [8. System Hardware Requirements](#8-system-hardware-requirements)
-- [9. Related Resources](#9-related-resources)
-- [10. Acknowledgements](#10-acknowledgements)
-- [11. Cite Our Work](#11-cite-our-work)
-- [12. Licence](#12-licence)
+1. [Introduction](#1-introduction)
+2. [Quick Start](#2-quick-start)
+3. [Data](#3-data)
+4. [Perception Model](#4-perception-model)
+5. [Recovery Strategy Experiments](#5-recovery-strategy-experiments)
+6. [Test Automator](#6-test-automator)
+7. [System Hardware Requirements](#7-system-hardware-requirements)
+8. [Citation](#8-citation)
 
 ## 1. Introduction
 
-This repository contains the Unity digital twin simulator and Python inference server for UAV-based pavement monitoring without lane closure. The simulator provides a controlled environment for testing how an autonomous UAV inspects road segments when vehicles and pedestrians temporarily occlude the road surface.
+This repository contains the Unity digital twin simulator, trained perception models, and Python inference server for traffic-aware UAV pavement monitoring in open-traffic conditions. It provides a controlled environment for studying how autonomous UAV inspection behaves when dynamic vehicles, pedestrians, and temporary occlusions affect road-surface visibility.
 
 The framework integrates:
 
@@ -42,7 +38,7 @@ The framework integrates:
 - procedurally generated road defects, including Single Crack, Crocodile Crack, and Pothole;
 - autonomous UAV navigation over road segments using Unity NavMesh;
 - adaptive recovery strategies for occluded inspection regions;
-- a shared-backbone multitask YOLOv8n perception model for road defects, people, and cars;
+- a shared-backbone multitask YOLOv8n perception model for road defects, pedestrians, and vehicles;
 - a batch experiment automator for repeatable UAV recovery-strategy evaluation.
 
 At a high level, the runtime workflow is:
@@ -68,7 +64,6 @@ RDMO-DigitalTwin/
 |-- models/
 |   |-- model_base.pt          # Baseline checkpoint
 |   `-- model_finetuned.pt     # Deployed checkpoint for the simulator server
-|-- data/                      # Downloaded datasets; ignored by Git
 |-- results/                   # UAV recovery-strategy results and CSV exports
 `-- unity/
     |-- Assets/
@@ -80,17 +75,7 @@ RDMO-DigitalTwin/
 
 ### 1. Open the Unity project
 
-The Unity project root is:
-
-```text
-unity/
-```
-
-Open that folder in Unity Hub. The project was last configured with:
-
-```text
-Unity 6000.2.14f1
-```
+The Unity project root is: `unity/`. Open that folder in Unity Hub. The project was last configured with: `Unity 6000.2.14f1`.
 
 The main scenes are registered in `unity/ProjectSettings/EditorBuildSettings.asset`.
 
@@ -115,39 +100,19 @@ python -m pip install torch torchvision ultralytics fastapi "uvicorn[standard]" 
 
 ### 3. Start the model server
 
-The deployed checkpoint is:
-
-```text
-models/model_finetuned.pt
-```
-
-Start the server from the repository root:
+The deployed checkpoint is: `models/model_finetuned.pt` Start the server from the repository root:
 
 ```bash
 source .venv/bin/activate
 python unity/Assets/Scripts/AI/api_model_pt.py
 ```
 
-The legacy launcher is also supported:
-
-```bash
-python unity/Assets/Scripts/AI/api_baches.py
-```
-
-Both commands serve the inference API at:
-
-```text
-http://127.0.0.1:5000
-```
-
-Health check:
-
+Then, the server should allow inference at: `http://127.0.0.1:5000`. For a health check, use:
 ```bash
 curl http://127.0.0.1:5000/health
 ```
 
 Prediction test:
-
 ```bash
 curl -X POST \
   -F "file=@/absolute/path/to/test_image.png" \
@@ -173,22 +138,13 @@ Annotated server outputs are written to:
 unity/Assets/Scripts/AI/Detecciones_model_pt/
 ```
 
-To test a different checkpoint, set `RDMO_MODEL_PATH`:
-
-```bash
-RDMO_MODEL_PATH=/absolute/path/to/other_model.pt \
-python unity/Assets/Scripts/AI/api_model_pt.py
-```
-
 ### 4. Run the simulator
 
-1. Start the Python server if model-assisted detections are required.
+1. Start the Python server.
 2. Open `unity/` in Unity Hub.
 3. Open `Assets/Scenes/Mode_Menu.unity`.
 4. Press Play.
 5. Select the desired simulator mode from the menu.
-
-For direct testing, open one of the scene files listed above and press Play.
 
 ## 3. Data
 
@@ -242,63 +198,15 @@ The Unity digital twin generates UAV-view road scenes with:
   <img src="assets/images/pothole-sample.png" width="31%" alt="Procedural pothole sample" />
 </p>
 
-### Model-development data
-
-For the perception model, the paper normalises road-damage annotations from multiple datasets into a common five-class taxonomy:
-
-| Final class | Role in the simulator |
-| --- | --- |
-| `Crocodile Crack` | Road-defect subtype. |
-| `Single Crack` | Road-defect subtype. |
-| `Pothole` | Road-defect subtype. |
-| `Person` | Dynamic occluding traffic agent. |
-| `Car` | Dynamic occluding traffic agent. |
-
-The balanced training dataset reported in the paper contains 46,175 images and 120,769 annotated boxes. A synthetic simulator dataset is then collected from the digital twin and used for domain fine-tuning, with 2,235 images and 25,943 annotated boxes.
-
-The full raw training datasets are not required to run the deployed simulator. They are required only for researchers who want to reproduce or extend the perception-model training pipeline.
-
-### Class Order
-
-All dataset YAML files use the same five-class mapping:
-
-| ID | Class |
-| ---: | --- |
-| 0 | `Crocodile Crack` |
-| 1 | `Single Crack` |
-| 2 | `Pothole` |
-| 3 | `Person` |
-| 4 | `Car` |
-
-The Unity capture exporter has been aligned with this mapping, so newly captured synthetic samples and the provided synthetic dataset use the same class IDs as the real-image datasets.
-
-### Reproducibility Notes
-
-- The Google Drive folder is the canonical distribution point for the paper datasets.
-- Keep the downloaded folders under `data/`; this path is intentionally ignored by Git.
-- Use `data/augmented_dataset/dataset.yaml` for the balanced real-image stage.
-- Use `data/synthetic_dataset/dataset.yaml` for the simulator-domain stage.
-- If you redistribute derived datasets, cite the arXiv preprint and the original public datasets listed in the paper.
-
 ## 4. Perception Model
+
+The deployed model is a shared-backbone multitask YOLOv8n model. It performs coarse detection first and then classifies road-defect subtypes from ROI-aligned features.
 
 <p align="center">
   <img src="assets/images/multitask-model.png" width="100%" alt="Shared-backbone multitask YOLOv8n perception model" />
 </p>
 
-The deployed model is a shared-backbone multitask YOLOv8n model. It is not a standard five-class YOLO detector. Instead, it performs coarse detection first and then classifies road-defect subtypes from ROI-aligned features.
-
-```text
-Input image
-  -> YOLOv8n backbone and neck
-  -> shared feature maps
-      |-- detection head
-      |     Road-defect-general / Person / Car
-      `-- ROIAlign on road-defect boxes
-            Crocodile Crack / Single Crack / Pothole
-```
-
-The final simulator-facing classes are:
+The model maps classes as follows:
 
 | ID | Class |
 | ---: | --- |
@@ -307,12 +215,6 @@ The final simulator-facing classes are:
 | 2 | `Pothole` |
 | 3 | `Person` |
 | 4 | `Car` |
-
-The arXiv preprint reports that the full simulator perception pipeline achieved 99.26% overall accuracy across the five classes on the simulator test set. The currently deployed checkpoint for this repository is `models/model_finetuned.pt`, loaded by default through the Python server.
-
-<p align="center">
-  <img src="assets/images/confusion-matrix.png" width="58%" alt="Fine-tuned multitask perception model confusion matrix" />
-</p>
 
 ## 5. Recovery Strategy Experiments
 
@@ -339,7 +241,16 @@ The full batch covers:
 3 traffic levels x 3 altitude levels x 4 strategies = 36 episodes
 ```
 
-The arXiv preprint reports that flight altitude strongly affects inspection coverage and that adaptive recovery improves performance under occlusion. In the reported experiments, hover-and-recheck provides the most consistent coverage under medium and high traffic conditions, while skip-and-revisit is most effective in low-traffic scenarios.
+The final paper reports that flight altitude strongly affects inspection coverage, but no single recovery strategy dominates across all traffic and altitude settings. Baseline remains strongest in several medium- and high-altitude configurations, Hover improves coverage in some medium- and high-traffic cases but can increase mission time under congestion, Micro is useful in selected low-altitude cases, and Skip introduces revisit behaviour at the cost of longer missions and higher energy use.
+
+The processed recovery-strategy results are available in the tracked `results/` folder:
+
+| File | Purpose |
+| --- | --- |
+| `results/results.xlsx` | Original workbook used to organise the UAV recovery-strategy experiment results. |
+| `results/uav_segment_results.csv` | Detailed per-segment export with 720 rows: 36 experiment configurations x 20 segment-level entries. Use this for fine-grained analysis. |
+| `results/uav_summary_results.csv` | Compact summary table with one row per traffic-altitude-strategy configuration. Use this to reproduce paper-style coverage, recovery, energy, and mission-time tables. |
+| `results/uav_results.csv` | Full-sheet CSV export that preserves the workbook's side-by-side layout for traceability. |
 
 ## 6. Test Automator
 
@@ -387,20 +298,7 @@ Important files:
 | `Ep*_Seg*_*.csv` | Per-segment details. |
 | `Episode_*_*.csv` | Per-episode segment details. |
 
-## 7. Results
-
-The `results/` folder contains the UAV recovery-strategy results used for sharing and post-processing.
-
-| File | Contents |
-| --- | --- |
-| `results/results.xlsx` | Original Excel workbook containing the UAV testing results. |
-| `results/uav_segment_results.csv` | Clean CSV export of the detailed per-segment table. It contains 720 rows, corresponding to 36 experiment configurations x 20 segment-level entries. |
-| `results/uav_summary_results.csv` | Clean CSV export of the summary table. It contains 36 rows, one for each traffic-altitude-strategy configuration. |
-| `results/uav_results.csv` | Full-sheet CSV export that preserves the original side-by-side workbook layout. |
-
-For most reproducibility use cases, prefer `uav_segment_results.csv` for detailed analysis and `uav_summary_results.csv` for recreating paper-style tables. The summary CSV reports coverage, recovery, energy, and mission time as mean +/- standard deviation.
-
-## 8. System Hardware Requirements
+## 7. System Hardware Requirements
 
 ### Simulator
 
@@ -416,33 +314,14 @@ For most reproducibility use cases, prefer `uav_segment_results.csv` for detaile
 
 The experiments reported in the paper were run on a desktop with an AMD Ryzen 5 5600G CPU, NVIDIA GeForce GTX 1050 Ti GPU with 4 GB VRAM, and 16 GB RAM. Detector FPS comparisons were measured on an NVIDIA T4 GPU.
 
-## 9. Related Resources
-
-- arXiv preprint: <https://arxiv.org/abs/2606.20742>
-- arXiv PDF: <https://arxiv.org/pdf/2606.20742>
-- Dataset folder: <https://drive.google.com/drive/folders/1bfLm6uia9jM-xPxxl2PxLrq3OVG0Z8TZ?usp=sharing>
-- `results/results.xlsx`: original UAV testing workbook.
-- `results/uav_segment_results.csv` and `results/uav_summary_results.csv`: CSV exports for sharing and analysis.
-- `docs/paper.pdf`: local paper PDF/reference copy.
-- `docs/MODEL_CARD.md`: historical notes about the multitask model.
-- `docs/DEPLOYMENT.md`: historical deployment notes from earlier repository layouts.
-- `models/model_finetuned.pt`: current deployed checkpoint for the Python server.
-- `models/model_base.pt`: baseline checkpoint retained for comparison.
-
-The paper also discusses the public road-damage and UAV-view traffic datasets used to construct the training data, including HighRPD, RDD2022, UAV-PDD2023, UAPD, PothRGBD, and UAV car/pedestrian datasets.
-
-## 10. Acknowledgements
-
-This project builds on Unity, Blender, PyTorch, TorchVision, Ultralytics YOLO, Albumentations, FastAPI, and OpenCV. The perception model and evaluation protocol also depend on public pavement-distress and UAV-view traffic datasets cited in the arXiv preprint.
-
-## 11. Cite Our Work
+## 8. Citation
 
 If you use this simulator, model, or experiment automator in your research, please cite the associated paper:
 
 ```bibtex
-@misc{uchani2026digitaltwinframework,
-  title         = {A Digital Twin Framework for Traffic-Aware UAV Pavement Monitoring without Lane Closure},
-  author        = {Uchani, Yamil and Verdueta, Grace Abigail Luna and Figueroa, Mauricio and Salcedo, Edwin},
+@misc{uchani2026digitaltwinopentraffic,
+  title         = {A Digital Twin Framework for Traffic-Aware UAV Pavement Monitoring in Open-Traffic Conditions},
+  author        = {Uchani, Yamil and Luna, Grace and Salcedo, Edwin and Figueroa, Mauricio},
   year          = {2026},
   eprint        = {2606.20742},
   archivePrefix = {arXiv},
@@ -451,7 +330,3 @@ If you use this simulator, model, or experiment automator in your research, plea
   url           = {https://arxiv.org/abs/2606.20742}
 }
 ```
-
-## 12. Licence
-
-This repository is released under the [MIT License](LICENSE.md).

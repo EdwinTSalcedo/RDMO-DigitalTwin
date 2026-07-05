@@ -102,6 +102,7 @@ unity/Assets/Scripts/AI/*.onnx
 # Experiment/training artifacts outside the Unity project
 # ======================
 data/
+docs/
 experiments/runs/
 runs/
 wandb/
@@ -117,7 +118,6 @@ unity-backup/
 # ======================
 !README.md
 !unity/README.md
-!docs/**/*.md
 !models/
 !models/model_base.pt
 !models/model_finetuned.pt
