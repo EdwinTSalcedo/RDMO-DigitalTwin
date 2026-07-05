@@ -103,6 +103,8 @@ unity/Assets/Scripts/AI/*.onnx
 # ======================
 data/
 docs/
+results/*.xlsx
+results/uav_results.csv
 experiments/runs/
 runs/
 wandb/

@@ -56,15 +56,10 @@ RDMO-DigitalTwin/
 |-- README.md
 |-- assets/
 |   `-- images/                # Paper figures used in this README
-|-- docs/
-|   |-- paper.pdf              # Local paper PDF/reference copy
-|   |-- MODEL_CARD.md          # Historical model notes
-|   |-- DEPLOYMENT.md          # Historical deployment notes
-|   `-- LOG.md                 # Historical development notes
 |-- models/
 |   |-- model_base.pt          # Baseline checkpoint
 |   `-- model_finetuned.pt     # Deployed checkpoint for the simulator server
-|-- results/                   # UAV recovery-strategy results and CSV exports
+|-- results/                   # UAV recovery-strategy CSV exports
 `-- unity/
     |-- Assets/
     |-- Packages/
@@ -241,16 +236,14 @@ The full batch covers:
 3 traffic levels x 3 altitude levels x 4 strategies = 36 episodes
 ```
 
-The final paper reports that flight altitude strongly affects inspection coverage, but no single recovery strategy dominates across all traffic and altitude settings. Baseline remains strongest in several medium- and high-altitude configurations, Hover improves coverage in some medium- and high-traffic cases but can increase mission time under congestion, Micro is useful in selected low-altitude cases, and Skip introduces revisit behaviour at the cost of longer missions and higher energy use.
+> **Note 💡:** We found that flight altitude has a clear effect on inspection coverage, but there is no single best recovery strategy for every setting. In the reported experiments, Baseline often worked well at medium and high altitude, Hover helped in some busier traffic cases but could make missions longer, Micro was most useful in a few low-altitude cases, and Skip added revisit behaviour with extra time and energy cost.
 
-The processed recovery-strategy results are available in the tracked `results/` folder:
+The processed recovery-strategy results are available as CSV files in the tracked `results/` folder:
 
 | File | Purpose |
 | --- | --- |
-| `results/results.xlsx` | Original workbook used to organise the UAV recovery-strategy experiment results. |
-| `results/uav_segment_results.csv` | Detailed per-segment export with 720 rows: 36 experiment configurations x 20 segment-level entries. Use this for fine-grained analysis. |
+| `results/uav_segment_results.csv` | Detailed per-segment export with 720 rows: 36 experiment configurations x 20 segment-level entries. Use for per-segment analysis. |
 | `results/uav_summary_results.csv` | Compact summary table with one row per traffic-altitude-strategy configuration. Use this to reproduce paper-style coverage, recovery, energy, and mission-time tables. |
-| `results/uav_results.csv` | Full-sheet CSV export that preserves the workbook's side-by-side layout for traceability. |
 
 ## 6. Test Automator
 
