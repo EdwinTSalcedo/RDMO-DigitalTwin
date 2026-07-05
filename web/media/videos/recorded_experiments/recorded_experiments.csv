@@ -1,0 +1,5 @@
+episode,strategy,traffic,height,camera_1_view,camera_1_path,camera_2_view,camera_2_path
+33,Baseline,High,High,Backview pointing towards the UAV,assets/videos/recorded_experiments/episode_33_cam1.mp4,Topview from the UAV,assets/videos/recorded_experiments/episode_33_cam2.mp4
+34,Hover,High,High,Backview pointing towards the UAV,assets/videos/recorded_experiments/episode_34_cam1.mp4,Topview from the UAV,assets/videos/recorded_experiments/episode_34_cam2.mp4
+35,Micro,High,High,Backview pointing towards the UAV,assets/videos/recorded_experiments/episode_35_cam1.mp4,Topview from the UAV,assets/videos/recorded_experiments/episode_35_cam2.mp4
+36,Skip,High,High,Backview pointing towards the UAV,assets/videos/recorded_experiments/episode_36_cam1.mp4,Topview from the UAV,assets/videos/recorded_experiments/episode_36_cam2.mp4

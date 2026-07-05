@@ -88,39 +88,6 @@ document.querySelectorAll("[data-tabs]").forEach((tabs) => {
   });
 });
 
-document.querySelectorAll("[data-open-modal]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const modal = document.getElementById(button.dataset.openModal);
-    openModal(modal);
-  });
-});
-
-document.querySelectorAll("[data-close-modal]").forEach((button) => {
-  button.addEventListener("click", () => {
-    closeModal(button.closest(".modal"));
-  });
-});
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    document.querySelectorAll(".modal.open").forEach(closeModal);
-  }
-});
-
-function openModal(modal) {
-  if (!modal) return;
-  modal.classList.add("open");
-  modal.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-}
-
-function closeModal(modal) {
-  if (!modal) return;
-  modal.classList.remove("open");
-  modal.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
-}
-
 const canvas = document.getElementById("network-canvas");
 const ctx = canvas?.getContext("2d");
 let particles = [];

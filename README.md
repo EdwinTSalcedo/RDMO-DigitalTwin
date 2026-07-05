@@ -230,6 +230,17 @@ The processed recovery-strategy results are available as CSV files in the tracke
 | `results/uav_segment_results.csv` | Detailed per-segment export with 720 rows: 36 experiment configurations x 20 segment-level entries. Use for per-segment analysis. |
 | `results/uav_summary_results.csv` | Compact summary table with one row per traffic-altitude-strategy configuration. Use this to reproduce paper-style coverage, recovery, energy, and mission-time tables. |
 
+### Recorded Experiment Videos
+
+Selected high-traffic, high-altitude episodes are included under `assets/videos/recorded_experiments/`. Camera 1 shows the backview pointing towards the UAV, while Camera 2 shows the topview from the UAV. The file `assets/videos/recorded_experiments/recorded_experiments.csv` keeps the same information in machine-readable form.
+
+| Episode | Strategy | Traffic | Height | Camera 1 | Camera 2 | Description |
+| ---: | --- | --- | --- | --- | --- | --- |
+| 33 | `Baseline` | `High` | `High` | [Backview](assets/videos/recorded_experiments/episode_33_cam1.mp4) | [UAV topview](assets/videos/recorded_experiments/episode_33_cam2.mp4) | Reference run without an explicit recovery action. |
+| 34 | `Hover` | `High` | `High` | [Backview](assets/videos/recorded_experiments/episode_34_cam1.mp4) | [UAV topview](assets/videos/recorded_experiments/episode_34_cam2.mp4) | Hover-and-recheck run where the UAV waits briefly over an occluded segment before continuing. |
+| 35 | `Micro` | `High` | `High` | [Backview](assets/videos/recorded_experiments/episode_35_cam1.mp4) | [UAV topview](assets/videos/recorded_experiments/episode_35_cam2.mp4) | Local repositioning run used to inspect how small UAV movements affect visibility under heavy traffic. |
+| 36 | `Skip` | `High` | `High` | [Backview](assets/videos/recorded_experiments/episode_36_cam1.mp4) | [UAV topview](assets/videos/recorded_experiments/episode_36_cam2.mp4) | Revisit-based run showing the skipped-segment behaviour and its extra mission cost. |
+
 ## 6. Test Automator
 
 The batch experiment automator is attached to the `DigitalTwinManager` object in:
@@ -300,7 +311,10 @@ RDMO-DigitalTwin/
 |-- assets/
 |   |-- gifs/                  # README animations of the project
 |   |-- images/                # Figures and visual examples
-|   `-- videos/                # Short simulator demo clips
+|   `-- videos/
+|       |-- recorded_experiments/ # Experiment recordings and CSV manifest
+|       |-- uav_view_back.mp4
+|       `-- uav_view_topview.mp4
 |-- models/
 |   |-- model_base.pt          # Baseline checkpoint
 |   `-- model_finetuned.pt     # Deployed checkpoint

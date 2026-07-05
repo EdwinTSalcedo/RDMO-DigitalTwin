@@ -48,17 +48,3 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
     }
   });
 });
-
-document.querySelectorAll("[data-video-label]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const label = button.dataset.videoLabel;
-    const original = button.querySelector(".video-label")?.textContent;
-    const labelElement = button.querySelector(".video-label");
-    if (!labelElement) return;
-
-    labelElement.textContent = `${label}: video placeholder`;
-    window.setTimeout(() => {
-      labelElement.textContent = original;
-    }, 1500);
-  });
-});

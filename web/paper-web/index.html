@@ -44,7 +44,8 @@
           <a class="pill" href="https://arxiv.org/pdf/2606.20742">Paper</a>
           <a class="pill" href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin">Code</a>
           <a class="pill" href="https://drive.google.com/drive/folders/1bfLm6uia9jM-xPxxl2PxLrq3OVG0Z8TZ?usp=sharing">Datasets</a>
-          <a class="pill" href="../../results/uav_summary_results.csv">Results CSV</a>
+          <a class="pill" href="https://raw.githubusercontent.com/EdwinTSalcedo/RDMO-DigitalTwin/main/results/uav_summary_results.csv">Results CSV</a>
+          <a class="pill" href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin/blob/main/notebooks/multimodal_uav_detector.ipynb">Notebook</a>
           <a class="pill subtle" href="#bibtex">BibTeX</a>
         </div>
       </section>
@@ -52,46 +53,38 @@
       <section class="teaser paper-width">
         <div class="teaser-grid">
           <figure class="teaser-panel large">
-            <div class="scene-sketch" aria-label="placeholder UAV simulator visualization">
-              <span class="sun"></span>
-              <span class="road"></span>
-              <span class="road vertical"></span>
-              <span class="building b1"></span>
-              <span class="building b2"></span>
-              <span class="building b3"></span>
-              <span class="uav">✣</span>
-              <span class="car c1"></span>
-              <span class="car c2"></span>
-              <span class="pothole"></span>
-              <span class="bbox defect">Pothole 0.84</span>
-              <span class="bbox person">Person 0.98</span>
-            </div>
+            <img
+              class="media-cover hero-gif"
+              src="../media/gifs/main.gif"
+              alt="Unity digital twin simulator showing UAV pavement inspection under moving traffic"
+            />
             <figcaption>
               <strong>Digital twin inspection scene.</strong>
-              Placeholder for a Unity capture showing the UAV, moving road users,
-              and detected road-surface defects.
+              UAV pavement monitoring in the Unity simulator with moving traffic and road-surface inspection.
             </figcaption>
           </figure>
 
           <figure class="teaser-panel">
-            <div class="mini-figure map-view">
-              <span></span><span></span><span></span><span></span>
-            </div>
+            <img
+              class="media-cover"
+              src="../media/images/simulator-map.png"
+              alt="Unity digital twin simulator map view"
+            />
             <figcaption>
-              <strong>Traffic-aware monitoring.</strong>
-              Evaluate occlusion recovery under different traffic densities and flight altitudes.
+              <strong>Simulator map.</strong>
+              Controlled traffic-aware scene used to evaluate occlusion recovery under different flight altitudes.
             </figcaption>
           </figure>
 
           <figure class="teaser-panel">
-            <div class="mini-figure prediction-view">
-              <i style="--w: 78%"></i>
-              <i style="--w: 91%"></i>
-              <i style="--w: 65%"></i>
-            </div>
+            <img
+              class="media-cover"
+              src="../media/images/multitask-model.png"
+              alt="Shared-backbone multitask YOLOv8n perception model"
+            />
             <figcaption>
-              <strong>Perception loop.</strong>
-              Unity frames are sent to a model server and returned as five-class detections.
+              <strong>Perception model.</strong>
+              Shared-backbone YOLOv8n with a coarse detection head and ROIAlign subtype head.
             </figcaption>
           </figure>
         </div>
@@ -235,11 +228,11 @@
             </thead>
             <tbody>
               <tr>
-                <td><a href="../../results/uav_segment_results.csv">uav_segment_results.csv</a></td>
+                <td><a href="https://raw.githubusercontent.com/EdwinTSalcedo/RDMO-DigitalTwin/main/results/uav_segment_results.csv">uav_segment_results.csv</a></td>
                 <td>Per-segment coverage, recovery, mission time, and energy for 36 experiment settings.</td>
               </tr>
               <tr>
-                <td><a href="../../results/uav_summary_results.csv">uav_summary_results.csv</a></td>
+                <td><a href="https://raw.githubusercontent.com/EdwinTSalcedo/RDMO-DigitalTwin/main/results/uav_summary_results.csv">uav_summary_results.csv</a></td>
                 <td>Summary table used to reproduce the paper-style recovery-strategy results.</td>
               </tr>
             </tbody>
@@ -255,22 +248,34 @@
       <section id="simulator" class="paper-width content-section">
         <h2>Simulator and Qualitative Examples</h2>
         <p>
-          Replace the placeholders below with paper figures, Unity screenshots, detection overlays,
-          or short video clips before public release.
+          The screenshots below come from the simulator and dataset assets in the repository.
+          They show the camera viewpoints and generated road-surface defects used by the digital twin.
         </p>
 
         <div class="qual-grid">
           <figure>
-            <div class="placeholder image-a"></div>
-            <figcaption>UAV inspection view with traffic occlusion.</figcaption>
+            <img
+              class="media-cover"
+              src="../media/images/carview.png"
+              alt="Ground vehicle view in the Unity simulator"
+            />
+            <figcaption>Ground traffic view in the Unity simulator.</figcaption>
           </figure>
           <figure>
-            <div class="placeholder image-b"></div>
-            <figcaption>Successful pothole detection and subtype prediction.</figcaption>
+            <img
+              class="media-cover"
+              src="../media/images/droneview.png"
+              alt="UAV inspection view in the Unity simulator"
+            />
+            <figcaption>UAV inspection view used for pavement monitoring.</figcaption>
           </figure>
           <figure>
-            <div class="placeholder image-c"></div>
-            <figcaption>Failure case: thin crack missed or classified as background.</figcaption>
+            <img
+              class="media-cover"
+              src="../media/images/droneview-topview.png"
+              alt="Top-down UAV camera view"
+            />
+            <figcaption>Top-down UAV camera view for inspection and coverage analysis.</figcaption>
           </figure>
         </div>
       </section>
@@ -278,78 +283,72 @@
       <section id="recovery-videos" class="paper-width content-section">
         <h2>Recovery Strategy Videos</h2>
         <p>
-          The final page can include short videos showing how the UAV behaves under
-          temporary occlusions. The placeholders below are designed to be replaced
-          with clips recorded from the Unity simulator, following the style of
-          academic project pages that present side-by-side qualitative rollouts.
+          These clips show selected high-traffic, high-altitude episodes. Camera 1 is the backview
+          pointing towards the UAV, and Camera 2 is the UAV topview. The full manifest is available as
+          <a href="../media/videos/recorded_experiments/recorded_experiments.csv">recorded_experiments.csv</a>.
         </p>
 
         <div class="video-grid">
           <article class="video-card">
-            <button class="video-placeholder baseline" type="button" data-video-label="Baseline">
-              <span class="play">▶</span>
-              <span class="path-line"></span>
-              <span class="occluder"></span>
-              <span class="video-label">Baseline</span>
-            </button>
+            <div class="video-pair">
+              <video controls preload="metadata" src="../media/videos/recorded_experiments/episode_33_cam1.mp4"></video>
+              <video controls preload="metadata" src="../media/videos/recorded_experiments/episode_33_cam2.mp4"></video>
+            </div>
             <h3>Baseline inspection</h3>
             <p>
-              The UAV follows the planned coverage route and does not explicitly
-              recover occluded road segments.
+              Episode 33. The UAV follows the planned coverage route without an explicit recovery action.
             </p>
+            <div class="experiment-links">
+              <a href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin/blob/main/assets/videos/recorded_experiments/episode_33_cam1.mp4">Camera 1 file</a>
+              <a href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin/blob/main/assets/videos/recorded_experiments/episode_33_cam2.mp4">Camera 2 file</a>
+            </div>
           </article>
 
           <article class="video-card">
-            <button class="video-placeholder hover" type="button" data-video-label="Hover-and-recheck">
-              <span class="play">▶</span>
-              <span class="path-line"></span>
-              <span class="occluder"></span>
-              <span class="uav-dot"></span>
-              <span class="video-label">Hover-and-recheck</span>
-            </button>
+            <div class="video-pair">
+              <video controls preload="metadata" src="../media/videos/recorded_experiments/episode_34_cam1.mp4"></video>
+              <video controls preload="metadata" src="../media/videos/recorded_experiments/episode_34_cam2.mp4"></video>
+            </div>
             <h3>Hover-and-recheck</h3>
             <p>
-              The UAV waits over the target segment, allowing temporary traffic
-              occlusions to clear before continuing inspection.
+              Episode 34. The UAV waits briefly over an occluded segment before continuing the inspection route.
             </p>
+            <div class="experiment-links">
+              <a href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin/blob/main/assets/videos/recorded_experiments/episode_34_cam1.mp4">Camera 1 file</a>
+              <a href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin/blob/main/assets/videos/recorded_experiments/episode_34_cam2.mp4">Camera 2 file</a>
+            </div>
           </article>
 
           <article class="video-card">
-            <button class="video-placeholder micro" type="button" data-video-label="Micro-repositioning">
-              <span class="play">▶</span>
-              <span class="path-line"></span>
-              <span class="occluder"></span>
-              <span class="uav-dot"></span>
-              <span class="video-label">Micro-repositioning</span>
-            </button>
+            <div class="video-pair">
+              <video controls preload="metadata" src="../media/videos/recorded_experiments/episode_35_cam1.mp4"></video>
+              <video controls preload="metadata" src="../media/videos/recorded_experiments/episode_35_cam2.mp4"></video>
+            </div>
             <h3>Micro-repositioning</h3>
             <p>
-              The UAV performs a small lateral displacement to recover visibility
-              while remaining close to the target road segment.
+              Episode 35. The UAV uses small local movement to recover visibility while staying near the target road segment.
             </p>
+            <div class="experiment-links">
+              <a href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin/blob/main/assets/videos/recorded_experiments/episode_35_cam1.mp4">Camera 1 file</a>
+              <a href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin/blob/main/assets/videos/recorded_experiments/episode_35_cam2.mp4">Camera 2 file</a>
+            </div>
           </article>
 
           <article class="video-card">
-            <button class="video-placeholder skip" type="button" data-video-label="Skip-and-revisit">
-              <span class="play">▶</span>
-              <span class="path-line"></span>
-              <span class="occluder"></span>
-              <span class="revisit-loop"></span>
-              <span class="video-label">Skip-and-revisit</span>
-            </button>
+            <div class="video-pair">
+              <video controls preload="metadata" src="../media/videos/recorded_experiments/episode_36_cam1.mp4"></video>
+              <video controls preload="metadata" src="../media/videos/recorded_experiments/episode_36_cam2.mp4"></video>
+            </div>
             <h3>Skip-and-revisit</h3>
             <p>
-              The UAV continues to the next segment and schedules the occluded
-              segment for a later revisit.
+              Episode 36. The UAV skips an occluded segment and revisits it later in the mission.
             </p>
+            <div class="experiment-links">
+              <a href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin/blob/main/assets/videos/recorded_experiments/episode_36_cam1.mp4">Camera 1 file</a>
+              <a href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin/blob/main/assets/videos/recorded_experiments/episode_36_cam2.mp4">Camera 2 file</a>
+            </div>
           </article>
         </div>
-
-        <p class="video-note">
-          Suggested final clips: 8–15 seconds each, same camera angle, same traffic
-          density, and synchronized captions showing coverage, mission time, and
-          recovery trigger.
-        </p>
       </section>
 
       <section id="deployment" class="paper-width content-section">
