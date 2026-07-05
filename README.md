@@ -7,14 +7,12 @@
 [Yamil Uchani](https://www.linkedin.com/in/yamiluchani/), [Grace Luna](https://www.linkedin.com/in/grace-luna-verdueta/), [Edwin Salcedo](https://www.linkedin.com/in/edwinsalcedo/), and [Mauricio Figueroa](https://www.linkedin.com/in/mau-figue/)
 
 [![arXiv](https://img.shields.io/badge/arXiv-2606.20742-grey?labelColor=B31B1B&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2606.20742)
-[![Paper PDF](https://img.shields.io/badge/Paper-PDF-grey?labelColor=B31B1B&logo=adobeacrobatreader&logoColor=white)](https://arxiv.org/pdf/2606.20742)
 [![Unity](https://img.shields.io/badge/Unity-6000.2.14f1-grey?labelColor=000000&logo=unity&logoColor=white)](unity/)
 [![Model](https://img.shields.io/badge/Model-model__finetuned.pt-grey?labelColor=3776AB&logo=pytorch&logoColor=white)](models/model_finetuned.pt)
 [![Datasets](https://img.shields.io/badge/Datasets-Google%20Drive-grey?labelColor=34A853&logo=googledrive&logoColor=white)](https://drive.google.com/drive/folders/1bfLm6uia9jM-xPxxl2PxLrq3OVG0Z8TZ?usp=sharing)
-[![Repository](https://img.shields.io/badge/GitHub-RDMO--DigitalTwin-grey?labelColor=181717&logo=github&logoColor=white)](https://github.com/EdwinTSalcedo/RDMO-DigitalTwin)
 
 <p align="center">
-  <img src="assets/gifs/main.gif" width="92%" alt="Unity digital twin simulator showing UAV pavement inspection under moving traffic" />
+  <img src="assets/gifs/main.gif" width="60%" alt="Unity digital twin simulator showing UAV pavement inspection under moving traffic" />
 </p>
 
 ## Menu
@@ -26,7 +24,8 @@
 5. [Recovery Strategy Experiments](#5-recovery-strategy-experiments)
 6. [Test Automator](#6-test-automator)
 7. [System Hardware Requirements](#7-system-hardware-requirements)
-8. [Citation](#8-citation)
+8. [Repository Structure](#8-repository-structure)
+9. [Citation](#9-citation)
 
 ## 1. Introduction
 
@@ -38,33 +37,8 @@ The framework integrates:
 - procedurally generated road defects, including Single Crack, Crocodile Crack, and Pothole;
 - autonomous UAV navigation over road segments using Unity NavMesh;
 - adaptive recovery strategies for occluded inspection regions;
-- a shared-backbone multitask YOLOv8n perception model for road defects, pedestrians, and vehicles;
+- a multitask YOLOv8n perception model for road defects, pedestrians, and vehicles;
 - a batch experiment automator for repeatable UAV recovery-strategy evaluation.
-
-At a high level, the runtime workflow is:
-
-```text
-Unity digital twin
-  -> UAV route planning and segment inspection
-  -> traffic-aware visibility and recovery logic
-  -> optional Python perception server
-  -> model-assisted detections and experiment logs
-```
-
-```text
-RDMO-DigitalTwin/
-|-- README.md
-|-- assets/
-|   `-- images/                # Paper figures used in this README
-|-- models/
-|   |-- model_base.pt          # Baseline checkpoint
-|   `-- model_finetuned.pt     # Deployed checkpoint for the simulator server
-|-- results/                   # UAV recovery-strategy CSV exports
-`-- unity/
-    |-- Assets/
-    |-- Packages/
-    `-- ProjectSettings/
-```
 
 ## 2. Quick Start
 
@@ -95,7 +69,7 @@ python -m pip install torch torchvision ultralytics fastapi "uvicorn[standard]" 
 
 ### 3. Start the model server
 
-The deployed checkpoint is: `models/model_finetuned.pt` Start the server from the repository root:
+The deployed checkpoint is: `models/model_finetuned.pt`. Start the server from the repository root:
 
 ```bash
 source .venv/bin/activate
@@ -152,7 +126,7 @@ data/
 |   |-- train/
 |   |-- val/
 |   `-- test/
-|-- augmented_dataset/
+|-- balanced_dataset/
 |   |-- dataset.yaml
 |   |-- train/
 |   |-- valid/
@@ -169,7 +143,7 @@ data/
 | Folder | Paper name | Purpose | Paper statistics |
 | --- | --- | --- | --- |
 | `merged_dataset` | Merged Dataset | Normalised five-class dataset assembled from the source road-damage and UAV traffic datasets before balancing. | 18,741 images, including 17,938 annotated images and 803 backgrounds; 71,034 boxes. |
-| `augmented_dataset` | Balanced Dataset | Class-balanced and augmented real-image dataset used for the first model-development stage. | 46,175 images, including 42,755 annotated images and 3,420 backgrounds; 120,769 boxes. |
+| `balanced_dataset` | Balanced Dataset | Class-balanced and augmented real-image dataset used for the first model-development stage. | 46,175 images, including 42,755 annotated images and 3,420 backgrounds; 120,769 boxes. |
 | `synthetic_dataset` | Synthetic Dataset | Unity-captured target-domain dataset used for simulator-domain fine-tuning and evaluation. | 2,235 images; 25,943 boxes. |
 
 ### Simulator data
@@ -195,7 +169,7 @@ The Unity digital twin generates UAV-view road scenes with:
 
 ## 4. Perception Model
 
-The deployed model is a shared-backbone multitask YOLOv8n model. It performs coarse detection first and then classifies road-defect subtypes from ROI-aligned features.
+The deployed model is a multitask YOLOv8n model. It performs coarse detection first and then classifies road-defect subtypes from ROI-aligned features. The notebook `notebooks/multimodal_uav_detector.ipynb` includes the detector implementation, dataset checks, checkpoint loading, model evaluation switch, and synthetic fine-tuning switch. The exported checkpoints are stored under `models/`.
 
 <p align="center">
   <img src="assets/images/multitask-model.png" width="100%" alt="Shared-backbone multitask YOLOv8n perception model" />
@@ -235,6 +209,17 @@ The full batch covers:
 ```text
 3 traffic levels x 3 altitude levels x 4 strategies = 36 episodes
 ```
+
+### Reported Metrics
+
+The paper-style recovery tables report the mean value over the 20 inspected segments in each traffic-altitude-strategy configuration.
+
+| Metric | Meaning | Segment-level calculation |
+| --- | --- | --- |
+| `Coverage (%)` | Percentage of real road defects detected by the perception model. Recovered detections found during a revisit are added to the final detected count, capped at 100%. | `detectedByModel / detectedByRaycast * 100`, with new recovered detections included when applicable. |
+| `Recovery Coverage (%)` / `Recovery (%)` | Percentage of additional defects found during the second pass. This applies to `Skip`; strategies without a revisit report `0%`. | `recoveredInSecondPass / detectedByRaycast * 100`, counting only defects found in the revisit that were not detected earlier. |
+| `Time (s)` | Time required to complete an inspected segment. | `Time.time - segmentStartTime`. |
+| `Energy (%)` | UAV battery energy consumed during an inspected segment. | `segmentStartEnergy - currentEnergy`. |
 
 > **Note 💡:** We found that flight altitude has a clear effect on inspection coverage, but there is no single best recovery strategy for every setting. In the reported experiments, Baseline often worked well at medium and high altitude, Hover helped in some busier traffic cases but could make missions longer, Micro was most useful in a few low-altitude cases, and Skip added revisit behaviour with extra time and energy cost.
 
@@ -307,9 +292,32 @@ Important files:
 
 The experiments reported in the paper were run on a desktop with an AMD Ryzen 5 5600G CPU, NVIDIA GeForce GTX 1050 Ti GPU with 4 GB VRAM, and 16 GB RAM. Detector FPS comparisons were measured on an NVIDIA T4 GPU.
 
-## 8. Citation
+## 8. Repository Structure
 
-If you use this simulator, model, or experiment automator in your research, please cite the associated paper:
+```text
+RDMO-DigitalTwin/
+|-- README.md
+|-- assets/
+|   |-- gifs/                  # README animations of the project
+|   |-- images/                # Figures and visual examples
+|   `-- videos/                # Short simulator demo clips
+|-- models/
+|   |-- model_base.pt          # Baseline checkpoint
+|   `-- model_finetuned.pt     # Deployed checkpoint
+|-- notebooks/
+|   `-- multimodal_uav_detector.ipynb # Multitask detector notebook
+|-- results/
+|   |-- uav_segment_results.csv # Per-segment UAV recovery-strategy results
+|   `-- uav_summary_results.csv # Aggregated recovery-strategy summaries
+`-- unity/
+    |-- Assets/
+    |-- Packages/
+    `-- ProjectSettings/
+```
+
+## 9. Citation
+
+If you find this project useful, please cite the associated paper:
 
 ```bibtex
 @misc{uchani2026digitaltwinopentraffic,
