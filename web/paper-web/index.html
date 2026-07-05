@@ -26,13 +26,13 @@
     <main id="top">
       <section class="hero paper-width">
         <p class="venue-note">Project page · Digital Twin · UAV Pavement Inspection</p>
-        <h1>A Digital Twin Framework for Traffic-Aware UAV Pavement Monitoring without Lane Closure</h1>
+        <h1>A Digital Twin Framework for Traffic-Aware UAV Pavement Monitoring in Open-Traffic Conditions</h1>
 
         <div class="authors">
           <a href="#">Yamil Uchani<sup>1</sup></a>
-          <a href="#">Grace Abigail Luna Verdueta<sup>1</sup></a>
-          <a href="#">Mauricio Figueroa<sup>1</sup></a>
+          <a href="#">Grace Luna<sup>1</sup></a>
           <a href="#">Edwin Salcedo<sup>2</sup></a>
+          <a href="#">Mauricio Figueroa<sup>1</sup></a>
         </div>
 
         <div class="affiliations">
@@ -41,10 +41,10 @@
         </div>
 
         <div class="link-row">
-          <a class="pill" href="../docs/paper.pdf">Paper</a>
-          <a class="pill" href="https://github.com/EdwinTSalcedo/rdmo-simulator">Code</a>
-          <a class="pill" href="../docs/MODEL_CARD.md">Model Card</a>
-          <a class="pill" href="../docs/REPRODUCIBILITY.md">Reproducibility</a>
+          <a class="pill" href="https://arxiv.org/pdf/2606.20742">Paper</a>
+          <a class="pill" href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin">Code</a>
+          <a class="pill" href="https://drive.google.com/drive/folders/1bfLm6uia9jM-xPxxl2PxLrq3OVG0Z8TZ?usp=sharing">Datasets</a>
+          <a class="pill" href="../../results/uav_summary_results.csv">Results CSV</a>
           <a class="pill subtle" href="#bibtex">BibTeX</a>
         </div>
       </section>
@@ -103,7 +103,7 @@
           UAV-based pavement inspection can reduce cost and safety risk, but active-road
           deployment remains challenging when vehicles, pedestrians, and temporary
           occlusions affect road-surface visibility. We present a Unity-based digital
-          twin framework for traffic-aware UAV pavement monitoring without lane closure.
+          twin framework for traffic-aware UAV pavement monitoring in open-traffic conditions.
           The environment integrates procedurally generated pavement defects, dynamic
           traffic agents, UAV inspection behavior, and a deployable perception module.
         </p>
@@ -204,78 +204,52 @@
       <section id="results" class="paper-width content-section">
         <h2>Experimental Results</h2>
         <p>
-          The current 30-epoch model was evaluated with IoU-based matching. The best
-          validation checkpoint was selected at epoch 11 using final five-class mAP@0.50.
+          The final model was trained on the balanced real-image dataset and then
+          fine-tuned on the synthetic simulator dataset. Evaluation was performed on
+          the held-out synthetic test split used in the paper.
         </p>
 
         <div class="result-cards">
           <article>
             <span>Final 5-class mAP@0.50</span>
-            <strong>0.6980</strong>
+            <strong>0.9591</strong>
           </article>
           <article>
             <span>Final 5-class mAP@0.50:0.95</span>
-            <strong>0.5548</strong>
+            <strong>0.6450</strong>
           </article>
           <article>
-            <span>Detection mAP@0.50</span>
-            <strong>0.8525</strong>
+            <span>Final macro F1</span>
+            <strong>0.9400</strong>
           </article>
           <article>
-            <span>Subtype ROI macro-F1</span>
-            <strong>0.9151</strong>
+            <span>Detection-head mAP@0.50</span>
+            <strong>0.9738</strong>
           </article>
         </div>
 
-        <div class="table-tabs" data-tabs>
-          <div class="tab-buttons" role="tablist" aria-label="Results tables">
-            <button class="active" type="button" data-panel="detect">Detection head</button>
-            <button type="button" data-panel="final">Final 5-class</button>
-            <button type="button" data-panel="subtype">Subtype analysis</button>
-          </div>
-
-          <div class="tab-panel active" id="panel-detect">
-            <table>
-              <thead>
-                <tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Road-defect-general</td><td>0.6418</td><td>0.5605</td><td>0.5984</td></tr>
-                <tr><td>Person</td><td>0.9858</td><td>0.9761</td><td>0.9809</td></tr>
-                <tr><td>Car</td><td>0.9986</td><td>0.9972</td><td>0.9979</td></tr>
-                <tr class="summary"><td>Macro</td><td>0.8754</td><td>0.8446</td><td>0.8591</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="tab-panel" id="panel-final">
-            <table>
-              <thead>
-                <tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Crocodile Crack</td><td>0.5589</td><td>0.4187</td><td>0.4787</td></tr>
-                <tr><td>Single Crack</td><td>0.4075</td><td>0.3099</td><td>0.3521</td></tr>
-                <tr><td>Pothole</td><td>0.8375</td><td>0.7927</td><td>0.8145</td></tr>
-                <tr><td>Person</td><td>0.9858</td><td>0.9761</td><td>0.9809</td></tr>
-                <tr><td>Car</td><td>0.9986</td><td>0.9972</td><td>0.9979</td></tr>
-                <tr class="summary"><td>Macro</td><td>0.7577</td><td>0.6989</td><td>0.7248</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="tab-panel" id="panel-subtype">
-            <table>
-              <thead>
-                <tr><th>ROI source</th><th>Accuracy</th><th>Macro F1</th><th>Samples</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Ground-truth road-defect ROIs</td><td>0.9070</td><td>0.9063</td><td>2257</td></tr>
-                <tr><td>Matched predicted road-defect ROIs</td><td>0.9360</td><td>0.9151</td><td>1265</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <figure class="academic-figure">
+          <table>
+            <thead>
+              <tr><th>Artifact</th><th>Contents</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="../../results/uav_segment_results.csv">uav_segment_results.csv</a></td>
+                <td>Per-segment coverage, recovery, mission time, and energy for 36 experiment settings.</td>
+              </tr>
+              <tr>
+                <td><a href="../../results/uav_summary_results.csv">uav_summary_results.csv</a></td>
+                <td>Summary table used to reproduce the paper-style recovery-strategy results.</td>
+              </tr>
+            </tbody>
+          </table>
+          <figcaption>
+            <strong>Recovery-strategy data.</strong>
+            CSV files are tracked in the repository so readers can replot or
+            reanalyse the UAV inspection results directly.
+          </figcaption>
+        </figure>
       </section>
 
       <section id="simulator" class="paper-width content-section">
@@ -391,10 +365,10 @@
           <div class="notes">
             <h3>Current path</h3>
             <ul>
-              <li>PyTorch checkpoint: <code>artifacts/best_model/best.pt</code></li>
-              <li>Server: <code>api_baches.py</code></li>
+              <li>PyTorch checkpoint: <code>models/model_finetuned.pt</code></li>
+              <li>Server: <code>unity/Assets/Scripts/AI/api_model_pt.py</code></li>
               <li>Endpoint: <code>http://127.0.0.1:5000/predict</code></li>
-              <li>Future web path: Unity WebGL or web UI calling a hosted HTTPS API.</li>
+              <li>Runtime path: Unity captures a frame, sends it to FastAPI, and receives JSON detections.</li>
             </ul>
           </div>
         </div>
@@ -402,13 +376,17 @@
 
       <section id="citation" class="paper-width content-section">
         <h2>Citation</h2>
-        <p>If this project is useful, please cite the paper once the final version is available.</p>
+        <p>If this project is useful, please cite the paper.</p>
 
-        <pre id="bibtex" class="bibtex"><code>@inproceedings{uchani2026rdmo,
-  title     = {A Digital Twin Framework for Traffic-Aware UAV Pavement Monitoring without Lane Closure},
-  author    = {Uchani, Yamil and Luna Verdueta, Grace Abigail and Figueroa, Mauricio and Salcedo, Edwin},
-  year      = {2026},
-  note      = {Manuscript in preparation}
+        <pre id="bibtex" class="bibtex"><code>@misc{uchani2026digitaltwinopentraffic,
+  title         = {A Digital Twin Framework for Traffic-Aware UAV Pavement Monitoring in Open-Traffic Conditions},
+  author        = {Uchani, Yamil and Luna, Grace and Salcedo, Edwin and Figueroa, Mauricio},
+  year          = {2026},
+  eprint        = {2606.20742},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO},
+  doi           = {10.48550/arXiv.2606.20742},
+  url           = {https://arxiv.org/abs/2606.20742}
 }</code></pre>
         <button class="copy-button" type="button" data-copy="#bibtex">Copy BibTeX</button>
       </section>
@@ -416,7 +394,7 @@
 
     <footer class="footer paper-width">
       <p>
-        RDMO Digital Twin project page. Static HTML/CSS/JS implementation for academic dissemination.
+        RDMO Digital Twin project page for traffic-aware UAV pavement monitoring.
       </p>
       <a href="#top">Back to top ↑</a>
     </footer>

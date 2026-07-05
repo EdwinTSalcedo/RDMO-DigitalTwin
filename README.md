@@ -14,7 +14,7 @@
 [![Repository](https://img.shields.io/badge/GitHub-RDMO--DigitalTwin-grey?labelColor=181717&logo=github&logoColor=white)](https://github.com/EdwinTSalcedo/RDMO-DigitalTwin)
 
 <p align="center">
-  <img src="assets/images/droneview.png" width="92%" alt="Unity digital twin simulator map view with traffic agents and an inspection segment" />
+  <img src="assets/gifs/main.gif" width="92%" alt="Unity digital twin simulator showing UAV pavement inspection under moving traffic" />
 </p>
 
 ## Menu

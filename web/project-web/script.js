@@ -69,39 +69,6 @@ function animateCounter(element) {
   requestAnimationFrame(tick);
 }
 
-const chartData = {
-  detection: [
-    ["Road defect", 0.5984],
-    ["Person", 0.9809],
-    ["Car", 0.9979],
-    ["Macro", 0.8591],
-  ],
-  final: [
-    ["Croc crack", 0.4787],
-    ["Single crack", 0.3521],
-    ["Pothole", 0.8145],
-    ["Person", 0.9809],
-    ["Car", 0.9979],
-  ],
-};
-
-document.querySelectorAll(".mini-chart").forEach((chart) => {
-  const rows = chartData[chart.dataset.chart] ?? [];
-  chart.innerHTML = rows
-    .map(
-      ([label, value]) => `
-        <div class="chart-row">
-          <span>${label}</span>
-          <span class="chart-track">
-            <span class="chart-fill" style="width: ${Math.round(value * 100)}%"></span>
-          </span>
-          <strong>${value.toFixed(3)}</strong>
-        </div>
-      `,
-    )
-    .join("");
-});
-
 document.querySelectorAll("[data-tabs]").forEach((tabs) => {
   const buttons = [...tabs.querySelectorAll(".tab-button")];
   const panels = [...tabs.querySelectorAll(".tab-panel")];

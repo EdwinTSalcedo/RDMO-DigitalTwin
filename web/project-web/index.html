@@ -54,9 +54,9 @@
 
           <div class="author-line" aria-label="Project contributors">
             <span>Yamil Uchani</span>
-            <span>Grace Abigail Luna Verdueta</span>
-            <span>Mauricio Figueroa</span>
+            <span>Grace Luna</span>
             <span>Edwin Salcedo</span>
+            <span>Mauricio Figueroa</span>
           </div>
 
           <div class="affiliations">
@@ -65,11 +65,11 @@
           </div>
 
           <div class="hero-actions">
-            <a class="button primary" href="../docs/paper.pdf">Digital Twin Paper</a>
-            <a class="button" href="../docs/paper2.pdf">Origin Paper</a>
-            <a class="button" href="https://github.com/EdwinTSalcedo/rdmo-simulator">Code</a>
-            <a class="button" href="../docs/MODEL_CARD.md">Model Card</a>
-            <a class="button ghost" href="#deployment">Edge roadmap</a>
+            <a class="button primary" href="https://arxiv.org/pdf/2606.20742">Digital Twin Paper</a>
+            <a class="button" href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin">Code</a>
+            <a class="button" href="https://drive.google.com/drive/folders/1bfLm6uia9jM-xPxxl2PxLrq3OVG0Z8TZ?usp=sharing">Datasets</a>
+            <a class="button" href="../../results/uav_summary_results.csv">Results CSV</a>
+            <a class="button ghost" href="#deployment">Deployment path</a>
           </div>
         </div>
 
@@ -128,12 +128,12 @@
           <span>Origin paper published</span>
         </article>
         <article>
-          <strong data-count="0.8525">0.0000</strong>
-          <span>Digital-twin detection mAP50</span>
+          <strong data-count="0.9591">0.0000</strong>
+          <span>Final mAP50</span>
         </article>
         <article>
-          <strong data-count="0.9151">0.0000</strong>
-          <span>Subtype ROI macro-F1</span>
+          <strong data-count="0.9400">0.0000</strong>
+          <span>Final macro-F1</span>
         </article>
         <article>
           <strong data-count="1">0</strong>
@@ -183,7 +183,7 @@
               road-damage detection, duplicate-report matching, clustering, and
               severity-based prioritisation for crowdsourced maintenance reports.
             </p>
-            <a href="../docs/paper2.pdf">Read origin paper</a>
+            <a href="https://www.mdpi.com/2224-2708/11/1/15">Read origin paper</a>
           </article>
 
           <article class="lineage-card current">
@@ -194,7 +194,7 @@
               pavement monitoring under traffic occlusions, using recovery
               strategies and a shared-backbone multi-task perception model.
             </p>
-            <a href="../docs/paper.pdf">Read digital-twin paper</a>
+            <a href="https://arxiv.org/pdf/2606.20742">Read digital-twin paper</a>
           </article>
 
           <article class="lineage-card future">
@@ -297,74 +297,38 @@
       <section id="results" class="content-section section-shell">
         <div class="section-heading centered">
           <p class="eyebrow">Current digital-twin benchmark</p>
-          <h2>Perception results for the continuation paper.</h2>
+          <h2>Final perception and recovery results.</h2>
           <p>
             These results belong to the current UAV digital-twin stage of RDMO.
-            Metrics are computed using IoU-based matching. The best validation
-            checkpoint was selected at epoch 11 and evaluated on the test split.
+            The perception model was fine-tuned on the synthetic simulator dataset,
+            and recovery-strategy outputs are shared as clean CSV files.
           </p>
         </div>
 
-        <div class="tabs" data-tabs>
-          <div class="tab-list" role="tablist" aria-label="Metric tables">
-            <button class="tab-button active" type="button" role="tab" aria-selected="true" data-tab="detection">
-              Detection
-            </button>
-            <button class="tab-button" type="button" role="tab" aria-selected="false" data-tab="final">
-              Final 5-class
-            </button>
-            <button class="tab-button" type="button" role="tab" aria-selected="false" data-tab="subtype">
-              Subtype head
-            </button>
-          </div>
+        <div class="comparison-cards">
+          <article>
+            <span>Final mAP@0.50</span>
+            <strong>0.9591</strong>
+            <small>five-class synthetic test evaluation</small>
+          </article>
+          <article>
+            <span>Final macro-F1</span>
+            <strong>0.9400</strong>
+            <small>after synthetic-domain fine-tuning</small>
+          </article>
+          <article>
+            <span>Detection-head mAP@0.50</span>
+            <strong>0.9738</strong>
+            <small>Road Defect, Person, and Car</small>
+          </article>
+        </div>
 
-          <div class="tab-panel active" id="tab-detection" role="tabpanel">
-            <div class="metric-table">
-              <div class="table-row header">
-                <span>Class</span><span>Precision</span><span>Recall</span><span>F1</span>
-              </div>
-              <div class="table-row"><span>Road-defect-general</span><span>0.6418</span><span>0.5605</span><span>0.5984</span></div>
-              <div class="table-row"><span>Person</span><span>0.9858</span><span>0.9761</span><span>0.9809</span></div>
-              <div class="table-row"><span>Car</span><span>0.9986</span><span>0.9972</span><span>0.9979</span></div>
-              <div class="table-row emphasis"><span>Macro</span><span>0.8754</span><span>0.8446</span><span>0.8591</span></div>
-            </div>
-            <div class="mini-chart" data-chart="detection"></div>
-          </div>
-
-          <div class="tab-panel" id="tab-final" role="tabpanel">
-            <div class="metric-table">
-              <div class="table-row header">
-                <span>Class</span><span>Precision</span><span>Recall</span><span>F1</span>
-              </div>
-              <div class="table-row"><span>Crocodile Crack</span><span>0.5589</span><span>0.4187</span><span>0.4787</span></div>
-              <div class="table-row"><span>Single Crack</span><span>0.4075</span><span>0.3099</span><span>0.3521</span></div>
-              <div class="table-row"><span>Pothole</span><span>0.8375</span><span>0.7927</span><span>0.8145</span></div>
-              <div class="table-row"><span>Person</span><span>0.9858</span><span>0.9761</span><span>0.9809</span></div>
-              <div class="table-row"><span>Car</span><span>0.9986</span><span>0.9972</span><span>0.9979</span></div>
-              <div class="table-row emphasis"><span>Macro</span><span>0.7577</span><span>0.6989</span><span>0.7248</span></div>
-            </div>
-            <div class="mini-chart" data-chart="final"></div>
-          </div>
-
-          <div class="tab-panel" id="tab-subtype" role="tabpanel">
-            <div class="comparison-cards">
-              <article>
-                <span>Ground-truth ROIs</span>
-                <strong>0.9063</strong>
-                <small>macro-F1 over 2257 samples</small>
-              </article>
-              <article>
-                <span>Matched predicted ROIs</span>
-                <strong>0.9151</strong>
-                <small>macro-F1 over 1265 samples</small>
-              </article>
-              <article>
-                <span>Current bottleneck</span>
-                <strong>Localization</strong>
-                <small>thin crack recall remains the main weakness</small>
-              </article>
-            </div>
-          </div>
+        <div class="callout">
+          <strong>Recovery-strategy data:</strong>
+          use <a href="../../results/uav_segment_results.csv">uav_segment_results.csv</a>
+          for per-segment analysis and
+          <a href="../../results/uav_summary_results.csv">uav_summary_results.csv</a>
+          for the paper-style summary table.
         </div>
       </section>
 
@@ -426,9 +390,9 @@
             <div class="terminal-top">
               <span></span><span></span><span></span>
             </div>
-            <pre><code>$ python "unity/Detector de baches/Assets/Scripts/IA/api_baches.py"
-Loaded shared-backbone model: artifacts/best_model/best.pt
-Single-pass assertion: enabled
+            <pre><code>$ python unity/Assets/Scripts/AI/api_model_pt.py
+Loaded model: models/model_finetuned.pt
+Inference API: ready
 Uvicorn running on http://127.0.0.1:5000
 
 $ curl http://127.0.0.1:5000/health
@@ -449,7 +413,7 @@ $ curl http://127.0.0.1:5000/health
               <li>Compress, quantize, or distil the perception stack</li>
               <li>Evaluate edge accuracy/latency tradeoffs against the server baseline</li>
             </ul>
-            <a class="button" href="../docs/DEPLOYMENT.md">Read deployment guide</a>
+            <a class="button" href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin#2-quick-start">Read quick start</a>
           </div>
         </div>
       </section>
@@ -482,33 +446,33 @@ $ curl http://127.0.0.1:5000/health
       <section class="content-section section-shell links-section">
         <div class="section-heading centered">
           <p class="eyebrow">Resources</p>
-          <h2>RDMO papers, implementation notes, and next-step documentation.</h2>
+          <h2>Public paper, code, datasets, and result exports.</h2>
         </div>
 
         <div class="resource-grid">
-          <a href="../docs/paper2.pdf">
+          <a href="https://www.mdpi.com/2224-2708/11/1/15">
             <span>Origin paper</span>
             <strong>Maintenance prioritisation</strong>
           </a>
-          <a href="../docs/paper.pdf">
+          <a href="https://arxiv.org/pdf/2606.20742">
             <span>Continuation paper</span>
             <strong>Digital twin inspection</strong>
           </a>
-          <a href="../docs/PAPER_UPDATE_DRAFT.md">
-            <span>Paper text</span>
-            <strong>Update draft</strong>
+          <a href="https://github.com/EdwinTSalcedo/RDMO-DigitalTwin">
+            <span>Repository</span>
+            <strong>Unity project and server</strong>
           </a>
-          <a href="../docs/REPRODUCIBILITY.md">
-            <span>How to reproduce</span>
-            <strong>Reproducibility guide</strong>
+          <a href="https://drive.google.com/drive/folders/1bfLm6uia9jM-xPxxl2PxLrq3OVG0Z8TZ?usp=sharing">
+            <span>Datasets</span>
+            <strong>Google Drive folder</strong>
           </a>
-          <a href="../docs/MODEL_CARD.md">
-            <span>Checkpoint details</span>
-            <strong>Model card</strong>
+          <a href="../../results/uav_segment_results.csv">
+            <span>Segment results</span>
+            <strong>Detailed CSV export</strong>
           </a>
-          <a href="../experiments/NEXT_EXPERIMENTS.md">
-            <span>Planned training</span>
-            <strong>Next experiments</strong>
+          <a href="../../results/uav_summary_results.csv">
+            <span>Summary results</span>
+            <strong>Paper-style CSV table</strong>
           </a>
         </div>
       </section>
