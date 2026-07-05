@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="RDMO is a road damage maintenance optimisation research system evolving from crowdsourced report prioritisation to UAV digital twins and edge-deployed computer vision."
+    />
+    <meta name="theme-color" content="#07111f" />
+    <title>RDMO | Road Damage Maintenance Optimisation</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <canvas id="network-canvas" aria-hidden="true"></canvas>
+
+    <header class="site-header" data-elevated="false">
+      <a class="brand" href="#top" aria-label="RDMO home">
+        <span class="brand-mark">R</span>
+        <span>
+          <strong>RDMO</strong>
+          <small>Road Damage Optimisation</small>
+        </span>
+      </a>
+
+      <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="#abstract">Vision</a>
+        <a href="#lineage">Lineage</a>
+        <a href="#architecture">System</a>
+        <a href="#results">Results</a>
+        <a href="#simulator">Digital Twin</a>
+        <a href="#deployment">Edge</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero section-shell">
+        <div class="hero-copy">
+          <p class="eyebrow">Crowdsourcing · Digital Twins · Edge AI</p>
+          <h1>RDMO: a road damage maintenance optimisation system.</h1>
+          <p class="hero-lede">
+            RDMO connects three research stages: computer vision for prioritising
+            crowdsourced road reports, a Unity digital twin for traffic-aware UAV
+            inspection, and the next step toward edge deployment of road-damage
+            perception models.
+          </p>
+
+          <div class="author-line" aria-label="Project contributors">
+            <span>Yamil Uchani</span>
+            <span>Grace Abigail Luna Verdueta</span>
+            <span>Mauricio Figueroa</span>
+            <span>Edwin Salcedo</span>
+          </div>
+
+          <div class="affiliations">
+            <span>Universidad Católica Boliviana “San Pablo”</span>
+            <span>Queen Mary University of London</span>
+          </div>
+
+          <div class="hero-actions">
+            <a class="button primary" href="../docs/paper.pdf">Digital Twin Paper</a>
+            <a class="button" href="../docs/paper2.pdf">Origin Paper</a>
+            <a class="button" href="https://github.com/EdwinTSalcedo/rdmo-simulator">Code</a>
+            <a class="button" href="../docs/MODEL_CARD.md">Model Card</a>
+            <a class="button ghost" href="#deployment">Edge roadmap</a>
+          </div>
+        </div>
+
+        <aside class="hero-visual" aria-label="Digital twin preview">
+          <div class="city-card glass">
+            <div class="city-toolbar">
+              <span class="dot red"></span>
+              <span class="dot amber"></span>
+              <span class="dot green"></span>
+              <span class="toolbar-title">RDMO decision cockpit</span>
+            </div>
+
+            <div class="city-grid">
+              <div class="road road-horizontal"></div>
+              <div class="road road-vertical"></div>
+              <div class="lane lane-1"></div>
+              <div class="lane lane-2"></div>
+              <div class="uav">
+                <span class="rotor r1"></span>
+                <span class="rotor r2"></span>
+                <span class="rotor r3"></span>
+                <span class="rotor r4"></span>
+                <span class="uav-core"></span>
+              </div>
+              <span class="vehicle car-a"></span>
+              <span class="vehicle car-b"></span>
+              <span class="person p-a"></span>
+              <span class="person p-b"></span>
+              <span class="defect pothole"></span>
+              <span class="defect crack"></span>
+              <span class="scan-box scan-1">Pothole 0.84</span>
+              <span class="scan-box scan-2">Person 0.98</span>
+            </div>
+
+            <div class="telemetry-strip">
+              <div>
+                <span>Altitude</span>
+                <strong>UAV</strong>
+              </div>
+              <div>
+                <span>Input</span>
+                <strong>Reports + frames</strong>
+              </div>
+              <div>
+                <span>Goal</span>
+                <strong>Prioritise</strong>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="metric-ribbon" aria-label="Key project metrics">
+        <article>
+          <strong data-count="2022">0</strong>
+          <span>Origin paper published</span>
+        </article>
+        <article>
+          <strong data-count="0.8525">0.0000</strong>
+          <span>Digital-twin detection mAP50</span>
+        </article>
+        <article>
+          <strong data-count="0.9151">0.0000</strong>
+          <span>Subtype ROI macro-F1</span>
+        </article>
+        <article>
+          <strong data-count="1">0</strong>
+          <span>Target edge model pass</span>
+        </article>
+      </section>
+
+      <section id="abstract" class="content-section section-shell">
+        <div class="section-heading">
+          <p class="eyebrow">Project vision</p>
+          <h2>From citizen road reports to autonomous inspection and edge AI.</h2>
+        </div>
+        <div class="two-column">
+          <p>
+            Road maintenance teams often receive many unstructured reports, images,
+            and requests, but limited budgets make it difficult to decide which
+            damaged areas should be repaired first. RDMO started as a computer-vision
+            and clustering pipeline for filtering, analysing, and prioritising
+            crowdsourced road-damage reports.
+          </p>
+          <p>
+            The current continuation expands the idea into an active inspection
+            system: a Unity digital twin tests UAV monitoring under traffic
+            occlusion, while a shared-backbone multi-task YOLO model detects road
+            defects and road users. The next stage is to move this perception stack
+            toward edge deployment.
+          </p>
+        </div>
+      </section>
+
+      <section id="lineage" class="content-section section-shell">
+        <div class="section-heading centered">
+          <p class="eyebrow">Research lineage</p>
+          <h2>RDMO is a system-level research programme, not a single model.</h2>
+          <p>
+            The website links the origin paper, the current digital-twin paper, and
+            the planned edge-computing continuation.
+          </p>
+        </div>
+
+        <div class="lineage-grid">
+          <article class="lineage-card">
+            <span class="lineage-year">2022</span>
+            <h3>Paper 2 · Road maintenance prioritisation</h3>
+            <p>
+              The project began with a system that combines road segmentation,
+              road-damage detection, duplicate-report matching, clustering, and
+              severity-based prioritisation for crowdsourced maintenance reports.
+            </p>
+            <a href="../docs/paper2.pdf">Read origin paper</a>
+          </article>
+
+          <article class="lineage-card current">
+            <span class="lineage-year">Current</span>
+            <h3>Paper 1 · Traffic-aware UAV digital twin</h3>
+            <p>
+              The continuation introduces a Unity-based digital twin for UAV
+              pavement monitoring under traffic occlusions, using recovery
+              strategies and a shared-backbone multi-task perception model.
+            </p>
+            <a href="../docs/paper.pdf">Read digital-twin paper</a>
+          </article>
+
+          <article class="lineage-card future">
+            <span class="lineage-year">Next</span>
+            <h3>Edge deployment of road-damage perception</h3>
+            <p>
+              The next step is to optimise the computer-vision system for edge
+              execution, reducing reliance on a server while preserving robust
+              road-defect detection and subtype classification.
+            </p>
+            <a href="#deployment">See edge roadmap</a>
+          </article>
+        </div>
+      </section>
+
+      <section id="architecture" class="content-section section-shell">
+        <div class="section-heading centered">
+          <p class="eyebrow">RDMO system architecture</p>
+          <h2>A pipeline for acquisition, perception, prioritisation, and deployment.</h2>
+          <p>
+            The project combines offline road-report analysis, simulated UAV
+            inspection, and deployment-oriented computer vision into one road
+            damage optimisation workflow.
+          </p>
+        </div>
+
+        <div class="pipeline-grid">
+          <article class="pipeline-card" data-step="01">
+            <span class="pipeline-icon">📥</span>
+            <h3>Acquire evidence</h3>
+            <p>Collect citizen reports, road images, simulator frames, UAV views, and metadata for maintenance analysis.</p>
+          </article>
+          <article class="pipeline-card" data-step="02">
+            <span class="pipeline-icon">🔍</span>
+            <h3>Understand damage</h3>
+            <p>Segment road regions, detect defects, classify severity-related damage types, and identify duplicated reports.</p>
+          </article>
+          <article class="pipeline-card" data-step="03">
+            <span class="pipeline-icon">🧭</span>
+            <h3>Optimise decisions</h3>
+            <p>Cluster nearby reports, prioritise damaged zones, and evaluate UAV inspection policies under occlusion.</p>
+          </article>
+          <article class="pipeline-card" data-step="04">
+            <span class="pipeline-icon">⚙️</span>
+            <h3>Deploy perception</h3>
+            <p>Move from server-assisted inference toward edge-ready models that can run close to the inspection platform.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="model" class="content-section section-shell model-section">
+        <div class="section-heading">
+          <p class="eyebrow">Current perception module</p>
+          <h2>Shared-backbone perception for the digital-twin continuation.</h2>
+          <p>
+            The digital-twin stage replaces the older crop-classifier perception
+            path with a multi-task model that keeps one shared image encoding and
+            separates coarse detection from road-defect subtype recognition.
+          </p>
+        </div>
+
+        <div class="model-diagram glass" role="img" aria-label="Shared backbone multi-task YOLO diagram">
+          <div class="node input-node">
+            <span>640×640 RGB</span>
+            <strong>Input image</strong>
+          </div>
+          <div class="arrow"></div>
+          <div class="node backbone-node">
+            <span>Executed once</span>
+            <strong>YOLO backbone + neck</strong>
+            <small>P3 / P4 / P5 feature maps</small>
+          </div>
+          <div class="branch-wrap">
+            <div class="branch">
+              <div class="branch-line"></div>
+              <div class="node head-node">
+                <span>Detection head</span>
+                <strong>Road-defect-general · Person · Car</strong>
+              </div>
+            </div>
+            <div class="branch">
+              <div class="branch-line"></div>
+              <div class="node subtype-node">
+                <span>ROIAlign + subtype head</span>
+                <strong>Crocodile Crack · Single Crack · Pothole</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Why this matters for RDMO:</strong>
+          the perception model produces the structured evidence needed by the
+          optimisation layer: defect type, road-user occlusions, confidence, and
+          bounding boxes. The next step is compressing or exporting this model for
+          practical edge deployment.
+        </div>
+      </section>
+
+      <section id="results" class="content-section section-shell">
+        <div class="section-heading centered">
+          <p class="eyebrow">Current digital-twin benchmark</p>
+          <h2>Perception results for the continuation paper.</h2>
+          <p>
+            These results belong to the current UAV digital-twin stage of RDMO.
+            Metrics are computed using IoU-based matching. The best validation
+            checkpoint was selected at epoch 11 and evaluated on the test split.
+          </p>
+        </div>
+
+        <div class="tabs" data-tabs>
+          <div class="tab-list" role="tablist" aria-label="Metric tables">
+            <button class="tab-button active" type="button" role="tab" aria-selected="true" data-tab="detection">
+              Detection
+            </button>
+            <button class="tab-button" type="button" role="tab" aria-selected="false" data-tab="final">
+              Final 5-class
+            </button>
+            <button class="tab-button" type="button" role="tab" aria-selected="false" data-tab="subtype">
+              Subtype head
+            </button>
+          </div>
+
+          <div class="tab-panel active" id="tab-detection" role="tabpanel">
+            <div class="metric-table">
+              <div class="table-row header">
+                <span>Class</span><span>Precision</span><span>Recall</span><span>F1</span>
+              </div>
+              <div class="table-row"><span>Road-defect-general</span><span>0.6418</span><span>0.5605</span><span>0.5984</span></div>
+              <div class="table-row"><span>Person</span><span>0.9858</span><span>0.9761</span><span>0.9809</span></div>
+              <div class="table-row"><span>Car</span><span>0.9986</span><span>0.9972</span><span>0.9979</span></div>
+              <div class="table-row emphasis"><span>Macro</span><span>0.8754</span><span>0.8446</span><span>0.8591</span></div>
+            </div>
+            <div class="mini-chart" data-chart="detection"></div>
+          </div>
+
+          <div class="tab-panel" id="tab-final" role="tabpanel">
+            <div class="metric-table">
+              <div class="table-row header">
+                <span>Class</span><span>Precision</span><span>Recall</span><span>F1</span>
+              </div>
+              <div class="table-row"><span>Crocodile Crack</span><span>0.5589</span><span>0.4187</span><span>0.4787</span></div>
+              <div class="table-row"><span>Single Crack</span><span>0.4075</span><span>0.3099</span><span>0.3521</span></div>
+              <div class="table-row"><span>Pothole</span><span>0.8375</span><span>0.7927</span><span>0.8145</span></div>
+              <div class="table-row"><span>Person</span><span>0.9858</span><span>0.9761</span><span>0.9809</span></div>
+              <div class="table-row"><span>Car</span><span>0.9986</span><span>0.9972</span><span>0.9979</span></div>
+              <div class="table-row emphasis"><span>Macro</span><span>0.7577</span><span>0.6989</span><span>0.7248</span></div>
+            </div>
+            <div class="mini-chart" data-chart="final"></div>
+          </div>
+
+          <div class="tab-panel" id="tab-subtype" role="tabpanel">
+            <div class="comparison-cards">
+              <article>
+                <span>Ground-truth ROIs</span>
+                <strong>0.9063</strong>
+                <small>macro-F1 over 2257 samples</small>
+              </article>
+              <article>
+                <span>Matched predicted ROIs</span>
+                <strong>0.9151</strong>
+                <small>macro-F1 over 1265 samples</small>
+              </article>
+              <article>
+                <span>Current bottleneck</span>
+                <strong>Localization</strong>
+                <small>thin crack recall remains the main weakness</small>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="simulator" class="content-section section-shell">
+        <div class="section-heading">
+          <p class="eyebrow">Digital twin continuation</p>
+          <h2>Testing road-damage optimisation before field deployment.</h2>
+          <p>
+            The simulator extends RDMO from passive report analysis to active
+            inspection planning. It creates controlled conditions where UAV
+            coverage, traffic occlusion, mission time, and recovery strategies can
+            be studied before a real-world deployment.
+          </p>
+        </div>
+
+        <div class="media-grid">
+          <article class="media-card large" id="demo">
+            <div class="placeholder-video">
+              <button class="play-button" type="button" data-open-modal="demo-modal" aria-label="Open demo placeholder">
+                ▶
+              </button>
+              <div>
+                <strong>RDMO digital twin placeholder</strong>
+                <span>Replace with UAV inspection footage, recovery-strategy videos, or model overlay demos.</span>
+              </div>
+            </div>
+          </article>
+          <article class="media-card">
+            <span class="media-kicker">Inspection policies</span>
+            <h3>Recovery under occlusion</h3>
+            <p>Compare baseline, hover-and-recheck, micro-repositioning, and skip-and-revisit strategies.</p>
+          </article>
+          <article class="media-card">
+            <span class="media-kicker">Synthetic-to-operational</span>
+            <h3>Scenario generation</h3>
+            <p>Generate road defects, vehicles, pedestrians, and UAV viewpoints to stress-test monitoring policies.</p>
+          </article>
+          <article class="media-card">
+            <span class="media-kicker">Decision support</span>
+            <h3>From detections to maintenance</h3>
+            <p>Use detected damage type, confidence, visibility, and location as inputs for maintenance prioritisation.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="deployment" class="content-section section-shell">
+        <div class="section-heading centered">
+          <p class="eyebrow">Next stage</p>
+          <h2>Toward edge deployment of RDMO perception.</h2>
+          <p>
+            The current Unity simulator calls a Python model server. The next
+            research step is to make the computer-vision system practical for
+            edge devices and UAV-adjacent deployment.
+          </p>
+        </div>
+
+        <div class="deployment-panel glass">
+          <div class="terminal">
+            <div class="terminal-top">
+              <span></span><span></span><span></span>
+            </div>
+            <pre><code>$ python "unity/Detector de baches/Assets/Scripts/IA/api_baches.py"
+Loaded shared-backbone model: artifacts/best_model/best.pt
+Single-pass assertion: enabled
+Uvicorn running on http://127.0.0.1:5000
+
+$ curl http://127.0.0.1:5000/health
+{"ready": true, "architecture": "shared-yolo-backbone-roialign-subtype-head"}</code></pre>
+          </div>
+
+          <div class="deployment-copy">
+            <h3>Server today, edge tomorrow</h3>
+            <p>
+              The working prototype keeps the custom ROIAlign branch in Python
+              and exposes a lightweight HTTP contract to Unity. This gives a
+              reliable research baseline before optimizing for ONNX, TensorRT,
+              mobile GPUs, or embedded accelerators.
+            </p>
+            <ul class="check-list">
+              <li>Measure Unity-to-model latency and throughput</li>
+              <li>Export or approximate custom ROIAlign inference for deployment</li>
+              <li>Compress, quantize, or distil the perception stack</li>
+              <li>Evaluate edge accuracy/latency tradeoffs against the server baseline</li>
+            </ul>
+            <a class="button" href="../docs/DEPLOYMENT.md">Read deployment guide</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="experiments" class="content-section section-shell">
+        <div class="section-heading">
+          <p class="eyebrow">Edge deployment roadmap</p>
+          <h2>What the next RDMO stage should measure.</h2>
+        </div>
+
+        <div class="roadmap">
+          <article>
+            <span>01</span>
+            <h3>Latency instrumentation</h3>
+            <p>Break down capture, transfer, preprocessing, inference, ROIAlign, postprocessing, and Unity response time.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Model compression</h3>
+            <p>Compare quantization, pruning, distillation, and smaller backbones for edge-ready inference.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Edge validation</h3>
+            <p>Report accuracy, latency, power, and robustness on the target device or a realistic edge proxy.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="content-section section-shell links-section">
+        <div class="section-heading centered">
+          <p class="eyebrow">Resources</p>
+          <h2>RDMO papers, implementation notes, and next-step documentation.</h2>
+        </div>
+
+        <div class="resource-grid">
+          <a href="../docs/paper2.pdf">
+            <span>Origin paper</span>
+            <strong>Maintenance prioritisation</strong>
+          </a>
+          <a href="../docs/paper.pdf">
+            <span>Continuation paper</span>
+            <strong>Digital twin inspection</strong>
+          </a>
+          <a href="../docs/PAPER_UPDATE_DRAFT.md">
+            <span>Paper text</span>
+            <strong>Update draft</strong>
+          </a>
+          <a href="../docs/REPRODUCIBILITY.md">
+            <span>How to reproduce</span>
+            <strong>Reproducibility guide</strong>
+          </a>
+          <a href="../docs/MODEL_CARD.md">
+            <span>Checkpoint details</span>
+            <strong>Model card</strong>
+          </a>
+          <a href="../experiments/NEXT_EXPERIMENTS.md">
+            <span>Planned training</span>
+            <strong>Next experiments</strong>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>
+        RDMO · Road Damage Maintenance Optimisation · From crowdsourced reports to digital twins and edge AI.
+      </p>
+      <a href="#top">Back to top ↑</a>
+    </footer>
+
+    <div class="modal" id="demo-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="demo-modal-title">
+        <button class="modal-close" type="button" data-close-modal aria-label="Close modal">×</button>
+        <h2 id="demo-modal-title">Demo placeholder</h2>
+        <div class="demo-placeholder">
+          <span>🚁</span>
+          <p>
+            Replace this block with a Unity capture, recovery-strategy rollout,
+            WebGL build, or embedded video showing the RDMO inspection pipeline.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
