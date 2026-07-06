@@ -117,38 +117,15 @@ unity/Assets/Scripts/AI/Detecciones_model_pt/
 
 ## 3. Data
 
-The datasets described in the paper are available from [Google Drive](https://drive.google.com/drive/folders/1bfLm6uia9jM-xPxxl2PxLrq3OVG0Z8TZ?usp=sharing). Download the datasets and extract them under the repository root so the expected layout is:
+The datasets described in the paper are available on [Google Drive](https://drive.google.com/drive/folders/1bfLm6uia9jM-xPxxl2PxLrq3OVG0Z8TZ?usp=sharing) and follow the structure below:
 
-```text
-data/
-|-- merged_dataset/
-|   |-- data.yaml
-|   |-- train/
-|   |-- val/
-|   `-- test/
-|-- balanced_dataset/
-|   |-- dataset.yaml
-|   |-- train/
-|   |-- valid/
-|   `-- test/
-`-- synthetic_dataset/
-    |-- dataset.yaml
-    |-- train/
-    |-- valid/
-    `-- test/
-```
-
-### Dataset Files
-
-| Folder | Paper name | Purpose | Paper statistics |
+| Folder | Paper name | Purpose | Local files |
 | --- | --- | --- | --- |
-| `merged_dataset` | Merged Dataset | Normalised five-class dataset assembled from the source road-damage and UAV traffic datasets before balancing. | 18,741 images, including 17,938 annotated images and 803 backgrounds; 71,034 boxes. |
+| `merged_dataset` | Merged Dataset | Normalised five-class dataset assembled from the source road-damage and UAV traffic datasets before balancing. | 18,227 images, including 17,424 annotated images and 803 backgrounds; 71,034 boxes. |
 | `balanced_dataset` | Balanced Dataset | Class-balanced and augmented real-image dataset used for the first model-development stage. | 46,175 images, including 42,755 annotated images and 3,420 backgrounds; 120,769 boxes. |
-| `synthetic_dataset` | Synthetic Dataset | Unity-captured target-domain dataset used for simulator-domain fine-tuning and evaluation. | 2,235 images; 25,943 boxes. |
+| `synthetic_dataset` | Synthetic Dataset | Unity-captured target-domain dataset used for simulator-domain fine-tuning and evaluation. | 2,235 images, including 2,235 annotated images and 0 backgrounds; 25,943 boxes. |
 
-### Simulator data
-
-The Unity digital twin generates UAV-view road scenes with:
+Furthermore, the Unity digital twin generates UAV-view road scenes with:
 
 <p align="center">
   <img src="assets/images/carview.png" width="31%" alt="Ground vehicle view in the Unity simulator" />
