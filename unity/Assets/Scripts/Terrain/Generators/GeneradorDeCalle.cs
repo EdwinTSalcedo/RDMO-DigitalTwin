@@ -53,15 +53,31 @@ public class GeneradorDeCalle : MonoBehaviour
         Debug.Log("[GeneradorDeCalle] Generando malla de calle...");
 
         // Limpiar segmentos anteriores si existen
+        HashSet<Mesh> meshesToDestroy = new HashSet<Mesh>();
         foreach (var segmento in _segmentosCalle)
         {
             if (segmento != null)
             {
+                MeshFilter mf = segmento.GetComponent<MeshFilter>();
+                if (mf != null && mf.sharedMesh != null)
+                    meshesToDestroy.Add(mf.sharedMesh);
+
+                MeshCollider mc = segmento.GetComponent<MeshCollider>();
+                if (mc != null && mc.sharedMesh != null)
+                    meshesToDestroy.Add(mc.sharedMesh);
+
                 if (Application.isPlaying) Destroy(segmento);
                 else DestroyImmediate(segmento);
             }
         }
         _segmentosCalle.Clear();
+
+        foreach (Mesh mesh in meshesToDestroy)
+        {
+            if (mesh == null) continue;
+            if (Application.isPlaying) Destroy(mesh);
+            else DestroyImmediate(mesh);
+        }
 
         // Obtener todos los baches del generador
         List<Renderer> renderersBaches = new List<Renderer>();

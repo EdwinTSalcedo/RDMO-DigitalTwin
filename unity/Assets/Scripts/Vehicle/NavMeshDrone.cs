@@ -2,7 +2,7 @@ using UnityEngine;
 using Unity.AI.Navigation;
 using UnityEngine.AI;
 
-public class NavMeshDrone : MonoBehaviour
+public class NavMeshdrone : MonoBehaviour
 {
     void OnEnable()
     {

@@ -601,9 +601,20 @@ public class TerrainPotholeGenerator : MonoBehaviour
         
         // Use a list to avoid modifying the collection while iterating
         List<GameObject> toDestroy = new List<GameObject>();
+        HashSet<Mesh> meshesToDestroy = new HashSet<Mesh>();
         foreach (Transform child in transform)
         {
-            if (child != null) toDestroy.Add(child.gameObject);
+            if (child == null) continue;
+
+            toDestroy.Add(child.gameObject);
+
+            foreach (MeshFilter mf in child.GetComponentsInChildren<MeshFilter>(true))
+                if (mf != null && mf.sharedMesh != null)
+                    meshesToDestroy.Add(mf.sharedMesh);
+
+            foreach (MeshCollider mc in child.GetComponentsInChildren<MeshCollider>(true))
+                if (mc != null && mc.sharedMesh != null)
+                    meshesToDestroy.Add(mc.sharedMesh);
         }
 
         foreach (var child in toDestroy)
@@ -612,6 +623,13 @@ public class TerrainPotholeGenerator : MonoBehaviour
             
             if (Application.isPlaying) Destroy(child);
             else DestroyImmediate(child);
+        }
+
+        foreach (Mesh mesh in meshesToDestroy)
+        {
+            if (mesh == null) continue;
+            if (Application.isPlaying) Destroy(mesh);
+            else DestroyImmediate(mesh);
         }
     }
 
