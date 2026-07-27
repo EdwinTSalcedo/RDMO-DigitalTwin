@@ -266,11 +266,17 @@ Important files:
 
 ## 7. System Hardware Requirements
 
-### Simulator
+### Standalone Desktop Simulator (Windows)
 
-- Unity `6000.2.14f1`.
+- Unity `6000.2.14f1` (if opening/editing the project).
 - A desktop or laptop capable of running a Unity 3D project with dynamic agents and NavMesh navigation.
 - A discrete GPU is recommended for smoother interactive runs.
+- **Dependency**: Running the standalone Windows executable (`PotholeDetector.exe`) requires the **Microsoft Visual C++ Redistributable 2015–2022** (x64) installed on the host system.
+
+### Web Simulator (WebGL)
+
+- Runs directly in modern web browsers without installations.
+- **Hardware Power**: Executes client-side inside the browser using WebAssembly and WebGL, meaning it relies on the local user computer's CPU and GPU power to render and process the simulation.
 
 ### Python inference server
 
