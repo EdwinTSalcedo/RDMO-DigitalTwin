@@ -266,17 +266,27 @@ Important files:
 
 ## 7. System Hardware Requirements
 
-### Standalone Desktop Simulator (Windows)
+### Windows desktop simulator (`simulator/`)
 
-- Unity `6000.2.14f1` (if opening/editing the project).
+- Windows 10 or 11 (64-bit).
 - A desktop or laptop capable of running a Unity 3D project with dynamic agents and NavMesh navigation.
 - A discrete GPU is recommended for smoother interactive runs.
-- **Dependency**: Running the standalone Windows executable (`PotholeDetector.exe`) requires the **Microsoft Visual C++ Redistributable 2015–2022** (x64) installed on the host system.
+- **Microsoft Visual C++ 2015–2022 Redistributable (x64)** must be installed.  
+  Download it from the [official Microsoft page](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist).  
+  This is the redistributable package used by Unity `6000.2.14f1`, which this project is built with.
 
-### Web Simulator (WebGL)
+### Web simulator (`web/simulator-web/`)
 
-- Runs directly in modern web browsers without installations.
-- **Hardware Power**: Executes client-side inside the browser using WebAssembly and WebGL, meaning it relies on the local user computer's CPU and GPU power to render and process the simulation.
+> **Note:** The web build runs entirely inside your browser — no installation is required. However, it still uses the **processing power of your own computer** (CPU and GPU). Performance will depend on your hardware, and weaker machines may experience lower frame rates.
+
+- Any modern desktop browser with **WebAssembly** and **WebGL 2** support (Chrome, Edge, or Firefox recommended).
+- A mid-range or better GPU is recommended for acceptable frame rates.
+- At least **4 GB of RAM** available for the browser tab.
+- To run it locally from the repository, start the included server:
+  ```bat
+  web\simulator-web\start_server.bat
+  ```
+  Then open `http://127.0.0.1:8766` in your browser.
 
 ### Python inference server
 
