@@ -12,14 +12,13 @@ services:
       - DETECTIONS_DIR=/app/detecciones
     volumes:
       - ./detecciones_output:/app/detecciones
-    # Uncomment below to enable NVIDIA GPU acceleration if docker-nvidia-toolkit is installed
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   web-frontend:
     build:

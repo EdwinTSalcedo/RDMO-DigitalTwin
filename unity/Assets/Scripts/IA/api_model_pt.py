@@ -25,10 +25,16 @@ except Exception:
     yaml_model_load = None
 
 
-# =========================================================
-# CONFIG
-# =========================================================
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+def get_optimal_device():
+    if os.getenv("DEVICE"):
+        return os.getenv("DEVICE")
+    if torch.cuda.is_available():
+        return "cuda"
+    if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
+
+DEVICE = get_optimal_device()
 
 IMG_SIZE = 640
 YOLO_CONF = 0.40
