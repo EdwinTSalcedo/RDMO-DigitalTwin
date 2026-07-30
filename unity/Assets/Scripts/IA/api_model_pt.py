@@ -10,6 +10,7 @@ import uvicorn
 
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from ultralytics import YOLO
 
 try:
@@ -44,9 +45,13 @@ SUBTYPE_CONF = 0.80
 FEATURE_LAYER_INDEX = None
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_FILENAME = "model_finetuned.pt"
-MODEL_PATH = os.path.join(BASE_DIR, MODEL_FILENAME)
-DETECTIONS_DIR = os.path.join(BASE_DIR, "Detecciones_model_pt")
+MODEL_PATH = os.getenv("MODEL_PATH")
+if not MODEL_PATH or not os.path.exists(MODEL_PATH):
+    MODEL_PATH = os.path.join(BASE_DIR, "models", "model_finetuned.pt")
+if not os.path.exists(MODEL_PATH):
+    MODEL_PATH = os.path.join(BASE_DIR, "model_finetuned.pt")
+
+DETECTIONS_DIR = os.getenv("DETECTIONS_DIR", os.path.join(BASE_DIR, "Detecciones_model_pt"))
 
 DEFAULT_DETECTION_NAMES = (
     "Road-defect-general",
@@ -489,6 +494,9 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+os.makedirs(DETECTIONS_DIR, exist_ok=True)
+app.mount("/detecciones", StaticFiles(directory=DETECTIONS_DIR), name="detecciones")
+
 
 # =========================================================
 # PREDICT
@@ -605,9 +613,11 @@ def predict_image(file: UploadFile = File(...)):
 
 
 @app.get("/health")
+@app.get("/api/health")
 def health():
     return JSONResponse(
         content={
+            "status": "ok",
             "ready": detector is not None,
             "modelo": os.path.basename(MODEL_PATH),
             "modo_carga": model_load_mode,

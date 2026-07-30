@@ -1,0 +1,38 @@
+services:
+  yolo-backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    container_name: rdmo-yolo-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - MODEL_PATH=/app/models/model_finetuned.pt
+      - DETECTIONS_DIR=/app/detecciones
+    volumes:
+      - ./detecciones_output:/app/detecciones
+    # Uncomment below to enable NVIDIA GPU acceleration if docker-nvidia-toolkit is installed
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  web-frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    container_name: rdmo-web-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      yolo-backend:
+        condition: service_healthy
+
+networks:
+  default:
+    name: rdmo-network
