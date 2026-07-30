@@ -81,12 +81,22 @@ En computadoras portátiles con **Gráficos Híbridos (Intel Integrated + GPU NV
 
 ---
 
-## 📷 3. Almacenamiento de Capturas y Detecciones
+## 📁 3. Almacenamiento de Capturas y Detecciones en el Equipo Local
 
-- **Persistencia en Disco Local:** Cada foto procesada con las cajas delimitadoras de baches y defectos se guarda automáticamente en tu máquina física en la carpeta:
-  📁 **`./detecciones_output/`**
-- **Acceso Web / HTTP:** También puedes consultar o descargar cualquier captura guardada a través de la URL:
-  👉 `http://localhost/api/detecciones/<nombre_de_captura>.jpg`
+El volumen de almacenamiento para guardar las capturas está **100% preconfigurado** en `docker-compose.yml`:
+
+```yaml
+volumes:
+  - ./detecciones_output:/app/detecciones
+```
+
+### 🎯 Comportamiento para Releases de GitHub y Nuevos Usuarios:
+1. Cuando cualquier usuario descargue el proyecto o Release de GitHub y ejecute `docker compose up -d`:
+2. Docker creará **automáticamente** una carpeta llamada **`detecciones_output/`** en la raíz del directorio donde se levantó el `docker-compose.yml`.
+3. Cada vez que el simulador WebGL tome una captura o detecte un bache, el backend de IA dibujará los recuadros y la imagen anotada se guardará directamente en su computadora física en:
+   📁 **`<directorio_donde_corriste_compose>/detecciones_output/`**
+4. **Acceso Web / HTTP:** Cualquier captura también se puede visualizar desde el navegador mediante:
+   👉 `http://localhost/api/detecciones/<nombre_de_captura>.jpg`
 
 ---
 
