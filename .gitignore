@@ -87,6 +87,7 @@ unity/Assets/Scripts/IA/Detecciones IA/
 unity/Assets/Scripts/IA/Detecciones_model_pt/
 unity/Assets/Scripts/IA/debug_crops/
 unity/Assets/Scripts/IA/runs/
+detections_output/
 unity/Assets/Scripts/IA/imagen*.jpg
 unity/Assets/Scripts/IA/resultado_*.jpg
 
@@ -126,3 +127,12 @@ unity-backup/
 !models/
 !models/model_base.pt
 !models/model_finetuned.pt
+
+unity/Detector de baches/
+unity/Detector_Baches/
+unity/Detector_baches_web/
+unity/PRUEBALC/
+unity/DigitalTwin_Logs/
+
+graphify-out/
+tasks/

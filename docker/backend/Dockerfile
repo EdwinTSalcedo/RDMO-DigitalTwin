@@ -6,7 +6,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 ENV PYTHONUNBUFFERED=1 \
     DEBIAN_FRONTEND=noninteractive \
     MODEL_PATH=/app/models/model_finetuned.pt \
-    DETECTIONS_DIR=/app/detecciones \
+    DETECTIONS_DIR=/app/detections \
     UV_HTTP_TIMEOUT=600
 
 WORKDIR /app
@@ -26,7 +26,7 @@ RUN uv pip install --system --no-cache -r /app/requirements.txt
 COPY unity/Assets/Scripts/IA/api_model_pt.py /app/api_model_pt.py
 COPY models/ /app/models/
 
-RUN mkdir -p /app/detecciones
+RUN mkdir -p /app/detections
 
 EXPOSE 5000
 

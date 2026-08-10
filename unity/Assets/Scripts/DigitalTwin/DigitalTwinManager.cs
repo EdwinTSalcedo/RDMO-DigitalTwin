@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 
@@ -34,12 +34,12 @@ namespace DigitalTwin
         public Dictionary<RoadSegment, SegmentStatus> inspectionMemory = new Dictionary<RoadSegment, SegmentStatus>();
         public List<RoadSegment> revisitQueue = new List<RoadSegment>();
 
-        [Header("Modo Prueba")]
-        [Tooltip("Si est activo, no se envan capturas al servidor Python y las detecciones se simulan con raycast.")]
-        public bool testModeNoPython = true;
-        [Tooltip("Ventana de baches simulados en modo prueba. 4 significa evaluar grupos de 4.")]
+        [Header("Test Mode")]
+        [Tooltip("If enabled, frame captures are not sent to Python and detections are simulated using raycasts.")]
+        public bool testModeNoPython = false;
+        [Tooltip("Simulated pothole evaluation window in test mode.")]
         public int testModeConfirmEvery = 4;
-        [Tooltip("Cuantos baches se confirman dentro de cada ventana. 3 de 4 deja 1 fallido para probar Skip.")]
+        [Tooltip("Number of confirmed potholes per evaluation window.")]
         public int testModeConfirmCount = 3;
 
         [Header("Referencias a Sistemas Reales")]
@@ -57,6 +57,8 @@ namespace DigitalTwin
         {
             if (Instance == null) Instance = this;
             else Destroy(gameObject);
+
+            testModeNoPython = false;
         }
 
         private void FixedUpdate()

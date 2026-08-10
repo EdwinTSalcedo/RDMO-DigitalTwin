@@ -1,39 +1,39 @@
-# 🐳 Guía de Despliegue en Docker con Aceleración por GPU
+# 🐳 Docker Deployment Guide with GPU Acceleration
 
-Esta guía detalla los pasos para desplegar y ejecutar el Gemelo Digital y plataforma de percepción en tiempo real **RDMO** utilizando **Docker Compose** y aprovechando al 100% la tarjeta gráfica (**NVIDIA / AMD / Intel**).
+This guide describes how to deploy and run the **RDMO Digital Twin & Real-Time Perception Platform** using **Docker Compose** with GPU acceleration (**NVIDIA / AMD / Intel**).
 
 ---
 
-## 🏗️ Arquitectura de Servicios
+## 🏗️ Service Architecture
 
-| Servicio | Contenedor | Puerto | Descripción |
+| Service | Container | Port | Description |
 | :--- | :--- | :--- | :--- |
-| **Frontend WebGL** | `rdmo-web-frontend` | `http://localhost/` | Servidor Nginx que entrega la simulación 3D interactiva compilada en WebGL 2.0 (versión 2.0 con vehículos, personas y terrenos). |
-| **Backend YOLO API** | `rdmo-yolo-backend` | `http://localhost:5000/` | API REST servida con FastAPI + PyTorch para la inferencia y clasificación de baches/defectos viales en tiempo real. |
+| **Frontend WebGL** | `rdmo-web-frontend` | `http://localhost/` | Nginx web server delivering the 3D interactive simulation compiled in WebGL 2.0. |
+| **Backend YOLO API** | `rdmo-yolo-backend` | `http://localhost:5000/` | REST API served with FastAPI + PyTorch for real-time pothole and road defect inference. |
 
 ---
 
-## 🚀 1. Despliegue Estándar con Docker Compose
+## 🚀 1. Standard Docker Compose Startup
 
-Para iniciar todos los servicios del proyecto con un solo comando:
+Start all services with a single command:
 
 ```bash
 docker compose up -d
 ```
 
-Una vez iniciados los contenedores, abre tu navegador e ingresa a:  
+Once the containers are running, open your web browser at:  
 👉 **`http://localhost/`**
 
 ---
 
-## ⚡ 2. Configuración de Aceleración por GPU
+## ⚡ 2. GPU Acceleration Setup
 
-Para obtener el máximo rendimiento tanto en la simulación 3D como en la velocidad de detección de la IA, se debe habilitar la GPU en ambos extremos:
+To achieve peak performance for 3D rendering and AI inference speed, enable GPU acceleration:
 
-### A. Backend de IA (Docker Container + NVIDIA CUDA)
-Habilita que el modelo YOLO procese las imágenes en la GPU en lugar de la CPU (pasando de ~200ms a solo **10-15ms por imagen**).
+### A. AI Inference Backend (Docker Container + NVIDIA CUDA)
+Enables YOLO model execution on GPU instead of CPU (reducing latency from ~200ms to **10–15ms per frame**).
 
-1. **Instalar el Toolkit de NVIDIA para Docker (Linux):**
+1. **Install NVIDIA Container Toolkit (Linux):**
    ```bash
    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/nvidia-container-toolkit.gpg
    echo "deb https://nvidia.github.io/libnvidia-container/stable/ubuntu18.04/amd64 /" | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
@@ -42,7 +42,7 @@ Habilita que el modelo YOLO procese las imágenes en la GPU en lugar de la CPU (
    sudo systemctl restart docker
    ```
 
-2. **Verificar que `docker-compose.yml` tenga habilitada la GPU:**
+2. **Verify GPU configuration in `docker-compose.yml`:**
    ```yaml
    services:
      yolo-backend:
@@ -55,62 +55,60 @@ Habilita que el modelo YOLO procese las imágenes en la GPU en lugar de la CPU (
                  capabilities: [gpu]
    ```
 
-3. **Iniciar o reiniciar el contenedor:**
+3. **Start or restart containers:**
    ```bash
    docker compose up -d
    ```
 
 ---
 
-### B. Frontend WebGL (Renderizado 3D a 60+ FPS en Navegador)
-En computadoras portátiles con **Gráficos Híbridos (Intel Integrated + GPU NVIDIA Dedicada)**, Linux inicia los navegadores usando la gráfica integrada Intel para ahorrar energía. Para forzar el renderizado en la tarjeta NVIDIA dedicada:
+### B. Frontend WebGL (3D Rendering at 60+ FPS)
+On laptops with hybrid graphics (Intel Integrated + NVIDIA Dedicated GPU), force dedicated GPU rendering for optimal frame rates:
 
-#### 🦊 Opción 1: Firefox (Recomendado en Linux)
-- **Modo Gráfico:** Haz clic derecho sobre el icono de Firefox en el menú de inicio -> Selecciona **"Ejecutar con tarjeta gráfica dedicada"** (*Run with Dedicated Graphics Card*).
-- **Modo Terminal:**
+#### 🦊 Option 1: Firefox (Linux)
+- Right-click Firefox icon -> Select **"Run with Dedicated Graphics Card"**.
+- Or via terminal:
   ```bash
   MOZ_ENABLE_WAYLAND=0 __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia firefox http://localhost &
   ```
 
-#### 🌐 Opción 2: Chrome / Microsoft Edge / Brave
-1. En `Configuración -> Sistema`, asegúrate de tener activada: **"Usar aceleración por hardware cuando esté disponible"**.
-2. En la barra de direcciones, entra a `chrome://flags` (o `edge://flags`) y activa:
+#### 🌐 Option 2: Chrome / Microsoft Edge / Brave
+1. Go to `Settings -> System` and turn on: **"Use hardware acceleration when available"**.
+2. Open `chrome://flags` (or `edge://flags`) and set:
    - **Override software rendering list:** `Enabled`
    - **GPU rasterization:** `Enabled`
-3. Reinicia el navegador.
 
 ---
 
-## 📁 3. Almacenamiento de Capturas y Detecciones en el Equipo Local
+## 📁 3. Local Storage for AI Detection Captures
 
-El volumen de almacenamiento para guardar las capturas está **100% preconfigurado** en `docker-compose.yml`:
+Volume storage is configured in `docker-compose.yml`:
 
 ```yaml
 volumes:
-  - ./detecciones_output:/app/detecciones
+  - ./detections_output:/app/detections
 ```
 
-### 🎯 Comportamiento para Releases de GitHub y Nuevos Usuarios:
-1. Cuando cualquier usuario descargue el proyecto o Release de GitHub y ejecute `docker compose up -d`:
-2. Docker creará **automáticamente** una carpeta llamada **`detecciones_output/`** en la raíz del directorio donde se levantó el `docker-compose.yml`.
-3. Cada vez que el simulador WebGL tome una captura o detecte un bache, el backend de IA dibujará los recuadros y la imagen anotada se guardará directamente en su computadora física en:
-   📁 **`<directorio_donde_corriste_compose>/detecciones_output/`**
-4. **Acceso Web / HTTP:** Cualquier captura también se puede visualizar desde el navegador mediante:
-   👉 `http://localhost/api/detecciones/<nombre_de_captura>.jpg`
+### 🎯 Output Behavior:
+1. Docker automatically creates the **`detections_output/`** folder in your repository directory upon container launch.
+2. When the simulator captures frames or detects potholes, annotated images with bounding boxes are saved to:  
+   📁 **`./detections_output/`**
+3. **Web / HTTP Access:** Access processed captures via browser at:  
+   👉 `http://localhost/api/detections/<image_name>.jpg`
 
 ---
 
-## 🛠️ Comandos Útiles de Administración
+## 🛠️ Management Commands
 
-- **Ver estado y salud de los contenedores:**
+- **Check container status & health:**
   ```bash
   docker compose ps
   ```
-- **Ver registros en tiempo real del backend de IA:**
+- **Stream live backend logs:**
   ```bash
   docker compose logs -f yolo-backend
   ```
-- **Detener los servicios:**
+- **Stop services:**
   ```bash
   docker compose down
   ```
