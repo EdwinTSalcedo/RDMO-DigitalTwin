@@ -61,7 +61,12 @@ public class MovementInterface : MonoBehaviour
 
     private HashSet<string> detectedPotholes = new HashSet<string>();
     private HashSet<string> groundTruthObjectsSet = new HashSet<string>();  // Objetos tocados por raycast.
+    private HashSet<string> groundTruthDamageSet = new HashSet<string>();   // Solo baches/grietas reales.
     private int groundTruthCount = 0;
+    [Header("Debug Markers")]
+    public bool spawnDebugMarkers = true;
+    public int maxDebugMarkers = 100;
+    private Queue<GameObject> debugMarkers = new Queue<GameObject>();
 
     // Skip mode: tracking de primera y segunda pasada.
     private HashSet<string> detectedPotholesFirstPass = new HashSet<string>();
@@ -117,7 +122,7 @@ public class MovementInterface : MonoBehaviour
     /// <summary>Devuelve el ground truth total.</summary>
     public int GetGroundTruthCount()
     {
-        return groundTruthCount;
+        return groundTruthDamageSet.Count;
     }
 
     /// <summary>Resetea todos los contadores globales y de segmentos (llamar al inicio de cada calle/episodio).</summary>
@@ -125,6 +130,7 @@ public class MovementInterface : MonoBehaviour
     {
         detectedPotholes.Clear();
         groundTruthObjectsSet.Clear();
+        groundTruthDamageSet.Clear();
         groundTruthCount = 0;
         detectedPotholesFirstPass.Clear();
         detectedPotholesSecondPass.Clear();
@@ -135,6 +141,7 @@ public class MovementInterface : MonoBehaviour
         segmentDetectedFirstPassSet.Clear();
         segmentDetectedSecondPassSet.Clear();
         currentSegmentName = "";
+        ClearDebugMarkers();
         Debug.Log("[MovementInterface] Todos los contadores reiniciados");
     }
 
@@ -174,13 +181,16 @@ public class MovementInterface : MonoBehaviour
 
         HashSet<string> recoveredSet = new HashSet<string>(segmentDetectedSecondPassSet);
         recoveredSet.ExceptWith(segmentDetectedFirstPassSet);
+        int raycastTotal = segmentGroundTruthSet.Count;
+        int firstPassCount = Mathf.Min(segmentDetectedFirstPassSet.Count, raycastTotal);
+        int recoveredCount = Mathf.Min(recoveredSet.Count, Mathf.Max(0, raycastTotal - firstPassCount));
 
         var result = new SegmentResult
         {
             name                  = currentSegmentName,
-            detectedByModel       = segmentDetectedFirstPassSet.Count,
-            detectedByRaycast     = segmentGroundTruthSet.Count,
-            recoveredInSecondPass = recoveredSet.Count,
+            detectedByModel       = firstPassCount,
+            detectedByRaycast     = raycastTotal,
+            recoveredInSecondPass = recoveredCount,
             isSkipSegment         = droneController != null && droneController.navigationMode == NavigationMode.Skip,
             hadObstacles          = segmentHadObstacles,
             timeTaken             = Time.time - segmentStartTime,
@@ -201,14 +211,19 @@ public class MovementInterface : MonoBehaviour
         return new List<SegmentResult>(segmentResultsMap.Values);
     }
 
-    /// <summary>Registra un objeto en el ground truth del segmento activo.
-    /// Si el tag es Car o Person activa el flag hadObstacles.</summary>
+    /// <summary>Registra ground truth del segmento. Car/Person solo marcan obstaculo; no cuentan como bache real.</summary>
     public void RegisterSegmentGroundTruth(string objectName, string tag = "")
     {
         if (!isRecordingSegment) return;
-        segmentGroundTruthSet.Add(objectName);
+
         if (tag == "Car" || tag == "Person")
+        {
             segmentHadObstacles = true;
+            return;
+        }
+
+        if (IsDamageTag(tag))
+            segmentGroundTruthSet.Add(objectName);
     }
 
     /// <summary>Registra un bache CONFIRMADO por el modelo IA en el segmento activo.
@@ -221,12 +236,60 @@ public class MovementInterface : MonoBehaviour
 
         segmentDetectedSet.Add(objectName);
 
-        bool belongsToSecondPass = isInSecondPass && !detectedPotholesFirstPass.Contains(objectName);
+        bool belongsToSecondPass = isInSecondPass && !segmentDetectedFirstPassSet.Contains(objectName);
 
         if (belongsToSecondPass)
             segmentDetectedSecondPassSet.Add(objectName);
         else
             segmentDetectedFirstPassSet.Add(objectName);
+    }
+
+    public void RegisterSkipRevisitDetection(string objectName)
+    {
+        if (!isRecordingSegment || string.IsNullOrEmpty(objectName)) return;
+
+        detectedPotholes.Add(objectName);
+        detectedPotholesSecondPass.Add(objectName);
+        segmentDetectedSet.Add(objectName);
+        segmentDetectedSecondPassSet.Add(objectName);
+        visiblePotholes = string.Join("\n", detectedPotholes);
+    }
+
+    /// <summary>
+    /// Registra un bache que no estaba visible por raycast, pero fue confirmado por el modelo
+    /// durante una revisita Skip centrada. Esto aumenta el total real solo cuando aparece evidencia.
+    /// </summary>
+    public void RegisterSkipRevisitDiscoveredDamage(string objectName)
+    {
+        if (string.IsNullOrEmpty(objectName)) return;
+
+        groundTruthDamageSet.Add(objectName);
+
+        if (isRecordingSegment)
+            segmentGroundTruthSet.Add(objectName);
+    }
+
+    /// <summary>
+    /// Registra un candidato que el raycast identifico como obstaculo dinamico.
+    /// No cuenta como deteccion de bache; en Skip se agrega a la cola de revisita.
+    /// </summary>
+    public void RegisterObstacleCandidateForSkip(string objectID, Vector3 objectWorldPosition, string objectTag, string source)
+    {
+        if (!IsObstacleTag(objectTag)) return;
+
+        ForgetUnconfirmedCandidate(objectID);
+        droneController?.QueueSkipRevisitPosition(
+            objectWorldPosition,
+            $"{source} detectó obstáculo {objectTag} {objectID}");
+        Debug.Log($"[{source}] Obstáculo detectado por raycast: {objectID} ({objectTag})");
+    }
+
+    public void RegisterObstacleObservation(string objectID, string objectTag, string source)
+    {
+        if (!IsObstacleTag(objectTag)) return;
+
+        RegisterSegmentGroundTruth(objectID, objectTag);
+        Debug.Log($"[{source}] Obstáculo observado: {objectID} ({objectTag})");
     }
 
     /// <summary>Marca el inicio de la segunda pasada (Skip revisit).</summary>
@@ -246,6 +309,35 @@ public class MovementInterface : MonoBehaviour
         HashSet<string> recovered = new HashSet<string>(detectedPotholes);
         recovered.ExceptWith(detectedPotholesFirstPass);
         return recovered.Count;
+    }
+
+    public int GetCurrentSegmentGroundTruthCount()
+    {
+        return isRecordingSegment ? segmentGroundTruthSet.Count : groundTruthDamageSet.Count;
+    }
+
+    public int GetCurrentSegmentFirstPassDetectionCount()
+    {
+        int totalRaycast = GetCurrentSegmentGroundTruthCount();
+        int firstPassCount = isRecordingSegment ? segmentDetectedFirstPassSet.Count : detectedPotholesFirstPass.Count;
+        return totalRaycast > 0 ? Mathf.Min(firstPassCount, totalRaycast) : firstPassCount;
+    }
+
+    public int GetCurrentSegmentRecoveredCount()
+    {
+        int totalRaycast = GetCurrentSegmentGroundTruthCount();
+        int firstPassCount = GetCurrentSegmentFirstPassDetectionCount();
+        int remainingRaycast = Mathf.Max(0, totalRaycast - firstPassCount);
+
+        if (isRecordingSegment)
+        {
+            HashSet<string> recovered = new HashSet<string>(segmentDetectedSecondPassSet);
+            recovered.ExceptWith(segmentDetectedFirstPassSet);
+            return totalRaycast > 0 ? Mathf.Min(recovered.Count, remainingRaycast) : recovered.Count;
+        }
+
+        int recoveredCount = GetRecoveredPotholesCount();
+        return totalRaycast > 0 ? Mathf.Min(recoveredCount, remainingRaycast) : recoveredCount;
     }
 
     public bool IsInSkipSecondPass()
@@ -284,11 +376,15 @@ public class MovementInterface : MonoBehaviour
     {
         if (droneController != null)
             droneController.onObstacleCleared -= CheckPotholeAtClearedPosition;
+        ClearDebugMarkers();
     }
 
     private void Update()
     {
-        if (isCapturing)
+        // No capturar si el drone está en hover (esperando que se despeje un obstáculo)
+        bool shouldCapture = isCapturing && (droneController == null || !droneController.IsHoveringForObstacle());
+        
+        if (shouldCapture)
         {
             timer += Time.deltaTime;
 
@@ -449,6 +545,9 @@ public class MovementInterface : MonoBehaviour
         string potholeID = "";
         RaycastHit bestHit = new RaycastHit();
         float closestDistance = float.MaxValue;
+        RaycastHit bestObstacleHit = new RaycastHit();
+        bool obstacleHitDetected = false;
+        float closestObstacleDistance = float.MaxValue;
 
         foreach (Vector3 origin in rayOrigins)
         {
@@ -467,6 +566,7 @@ public class MovementInterface : MonoBehaviour
                     && !groundTruthObjectsSet.Contains(hitName))
                 {
                     groundTruthObjectsSet.Add(hitName);
+                    if (IsDamageTag(hitTag)) groundTruthDamageSet.Add(hitName);
                     groundTruthCount++;
                     RegisterSegmentGroundTruth(hitName, hitTag);  // ← tracking por segmento + obstacle flag
                     // Debug.Log($"[Ground Truth] {hitName} ({hitTag}) - Total: {groundTruthCount}");
@@ -482,7 +582,23 @@ public class MovementInterface : MonoBehaviour
                     bestHit = hit;
                     closestDistance = hit.distance;
                 }
+
+                if (IsObstacleTag(hitTag) && hit.distance < closestObstacleDistance)
+                {
+                    obstacleHitDetected = true;
+                    bestObstacleHit = hit;
+                    closestObstacleDistance = hit.distance;
+                }
             }
+        }
+
+        if (droneController != null
+            && droneController.navigationMode == NavigationMode.Skip
+            && obstacleHitDetected)
+        {
+            hitDetected = true;
+            bestHit = bestObstacleHit;
+            potholeID = bestObstacleHit.collider.gameObject.name;
         }
 
         // ════════════════════════════════════════════════════════════════════════════════════
@@ -565,8 +681,21 @@ public class MovementInterface : MonoBehaviour
 
     private IEnumerator ExecuteDelayedCapture(string potholeID, Vector3 candidateWorldPosition, string candidateTag)
     {
+        if (IsObstacleTag(candidateTag))
+        {
+            droneController?.TriggerHoverObstacleSlowdown(candidateTag, candidateWorldPosition);
+            yield break;
+        }
+
         if (captureDelay > 0)
             yield return new WaitForSeconds(captureDelay);
+
+        // Cancelar captura si el drone entró en hover durante el delay
+        if (droneController != null && droneController.IsHoveringForObstacle())
+        {
+            Debug.Log($"[MovementInterface] Captura cancelada: drone en hover ({potholeID})");
+            yield break;
+        }
 
         foreach (Camera cam in captureCameras)
         {
@@ -643,6 +772,14 @@ public class MovementInterface : MonoBehaviour
 
         if (!IsDamageTag(objectTag)) return;
 
+        if (IsInSkipSecondPass())
+        {
+            RegisterSkipRevisitDiscoveredDamage(objectID);
+            RegisterSkipRevisitDetection(objectID);
+            Debug.Log($"[TestMode] Detección simulada RECUPERADA en revisita Skip: {objectID} ({objectTag})");
+            return;
+        }
+
         int window = Mathf.Max(1, dtm.testModeConfirmEvery);
         int confirmCount = Mathf.Clamp(dtm.testModeConfirmCount, 0, window);
         int slot = testModeDamageSequence % window;
@@ -651,9 +788,6 @@ public class MovementInterface : MonoBehaviour
         if (slot >= confirmCount)
         {
             ForgetUnconfirmedCandidate(objectID);
-            droneController?.QueueSkipRevisitPosition(
-                objectWorldPosition,
-                $"TestMode fallo detección de {objectTag} {objectID}");
             Debug.Log($"[TestMode] Detección simulada FALLIDA: {objectID} ({objectTag}) slot {slot + 1}/{window}");
             return;
         }
@@ -682,6 +816,8 @@ public class MovementInterface : MonoBehaviour
 
     private void SpawnMarker(Vector3 position, string tag)
     {
+        if (!spawnDebugMarkers) return;
+
         // Crear plano primitivo
         GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
         
@@ -715,6 +851,37 @@ public class MovementInterface : MonoBehaviour
         
         // Asignar un nombre informativo
         plane.name = $"Marker_{tag}_{System.DateTime.Now.Ticks}";
+
+        debugMarkers.Enqueue(plane);
+        while (debugMarkers.Count > Mathf.Max(0, maxDebugMarkers))
+        {
+            GameObject oldMarker = debugMarkers.Dequeue();
+            DestroyDebugMarker(oldMarker);
+        }
+    }
+
+    private void ClearDebugMarkers()
+    {
+        while (debugMarkers.Count > 0)
+        {
+            GameObject marker = debugMarkers.Dequeue();
+            DestroyDebugMarker(marker);
+        }
+    }
+
+    private void DestroyDebugMarker(GameObject marker)
+    {
+        if (marker == null) return;
+
+        Renderer rend = marker.GetComponent<Renderer>();
+        if (rend != null)
+        {
+            Material mat = rend.material;
+            if (mat != null)
+                Destroy(mat);
+        }
+
+        Destroy(marker);
     }
 
     /// <summary>
@@ -724,6 +891,12 @@ public class MovementInterface : MonoBehaviour
     /// </summary>
     private void CheckPotholeAtClearedPosition(Vector3 worldXZPos)
     {
+        if (IsInSkipSecondPass())
+        {
+            CaptureSkipRevisitAtPosition(worldXZPos);
+            return;
+        }
+
         float scanHeight = (droneController != null) ? droneController.targetHeight : 5f;
         Vector3 origin   = new Vector3(worldXZPos.x, scanHeight + 1f, worldXZPos.z);
         float   scanDepth = scanHeight + 3f;
@@ -742,13 +915,14 @@ public class MovementInterface : MonoBehaviour
                 && !groundTruthObjectsSet.Contains(hitName))
             {
                 groundTruthObjectsSet.Add(hitName);
+                if (IsDamageTag(hitTag)) groundTruthDamageSet.Add(hitName);
                 groundTruthCount++;
                 RegisterSegmentGroundTruth(hitName, hitTag);  // ← tracking por segmento + obstacle flag
                 Debug.Log($"[Ground Truth] {hitName} ({hitTag}) - Total: {groundTruthCount}");
             }
 
             // ═══ MODELO: Baches ═══
-            if ((hitTag == "Pothole" || hitTag == "Crack" || hitTag == "Crack_Single") && !detectedPotholes.Contains(hitName))
+            if (IsDamageTag(hitTag) && !detectedPotholes.Contains(hitName))
             {
                 detectedPotholes.Add(hitName);
                 if (isInSecondPass) detectedPotholesSecondPass.Add(hitName);
@@ -785,6 +959,64 @@ public class MovementInterface : MonoBehaviour
             string allObjects = string.Join(", ", groundTruthObjectsSet);
             // Debug.Log($"🔍 [HOVER RAYCAST] Tocó: {allObjects} | Total: {groundTruthCount} objetos únicos");
         }
+    }
+
+    private void CaptureSkipRevisitAtPosition(Vector3 worldXZPos)
+    {
+        float scanHeight = (droneController != null) ? droneController.targetHeight : 5f;
+        Vector3 origin = new Vector3(worldXZPos.x, scanHeight + 1f, worldXZPos.z);
+        float scanDepth = scanHeight + 3f;
+
+        RaycastHit[] hits = Physics.RaycastAll(origin, Vector3.down, scanDepth);
+
+        RaycastHit bestDamageHit = new RaycastHit();
+        bool hasDamageHit = false;
+        float closestDamageDistance = float.MaxValue;
+
+        foreach (RaycastHit hit in hits)
+        {
+            string hitTag = hit.collider.tag;
+            string hitName = hit.collider.gameObject.name;
+
+            if ((hitTag == "Crocodile" || hitTag == "Pothole" || hitTag == "Crack" || hitTag == "Crack_Single" || hitTag == "Car" || hitTag == "Person")
+                && !groundTruthObjectsSet.Contains(hitName))
+            {
+                groundTruthObjectsSet.Add(hitName);
+                if (IsDamageTag(hitTag)) groundTruthDamageSet.Add(hitName);
+                groundTruthCount++;
+                RegisterSegmentGroundTruth(hitName, hitTag);
+                Debug.Log($"[Ground Truth] {hitName} ({hitTag}) - Total: {groundTruthCount}");
+            }
+
+            if (!IsDamageTag(hitTag)) continue;
+
+            if (hit.distance < closestDamageDistance)
+            {
+                closestDamageDistance = hit.distance;
+                bestDamageHit = hit;
+                hasDamageHit = true;
+            }
+        }
+
+        if (hasDamageHit)
+        {
+            string hitName = bestDamageHit.collider.gameObject.name;
+            string hitTag = bestDamageHit.collider.tag;
+
+            detectedPotholes.Add(hitName);
+            detectedPotholesSecondPass.Add(hitName);
+            currentPothole = hitName;
+            SpawnMarker(bestDamageHit.collider.transform.position, hitTag);
+            visiblePotholes = string.Join("\n", detectedPotholes);
+
+            Debug.Log($"[Skip] Revisita: enviando captura a Python para {hitName} ({hitTag}).");
+            StartCoroutine(ExecuteDelayedCapture(hitName, bestDamageHit.collider.transform.position, hitTag));
+            return;
+        }
+
+        string revisitID = $"SkipRevisit_{count}_{Mathf.RoundToInt(worldXZPos.x)}_{Mathf.RoundToInt(worldXZPos.z)}";
+        Debug.Log($"[Skip] Revisita: no hubo raycast directo, enviando captura a Python en {worldXZPos}.");
+        StartCoroutine(ExecuteDelayedCapture(revisitID, worldXZPos, ""));
     }
 
     public void AcDc()

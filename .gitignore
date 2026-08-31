@@ -123,3 +123,13 @@ unity-backup/
 !models/
 !models/model_base.pt
 !models/model_finetuned.pt
+
+unity/Detector de baches/
+
+unity/Detector de baches/
+unity/Detector_Baches/
+unity/Detector_baches_web/
+unity/PRUEBALC/
+unity/DigitalTwin_Logs/
+
+unity/Assets/Scripts/IA/debug_crops/

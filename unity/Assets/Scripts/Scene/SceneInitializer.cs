@@ -9,7 +9,7 @@ public class SceneInitializer : MonoBehaviour
 
 
     [Header("NavMesh")]
-    public NavMeshDrone navMeshDrone;
+    public NavMeshdrone navMeshDrone;
 
     [Header("Lógica de Juego")]
     public ToggleActiveExclusive gameLogicToggle;

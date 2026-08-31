@@ -75,7 +75,7 @@ namespace DigitalTwin
             // 4 y 5. Visibilidad (o_{s,t}) y Memoria (M_t)
             UpdateVisibilityState();
 
-            // 6. Action (\Pi) - Leer la poltica de DroneNavMeshController.cs
+            // 6. Action (\Pi) - Leer la poltica de DroneController.cs
             SyncRecoveryPolicy();
 
         }
@@ -254,3 +254,4 @@ namespace DigitalTwin
         }
     }
 }
+

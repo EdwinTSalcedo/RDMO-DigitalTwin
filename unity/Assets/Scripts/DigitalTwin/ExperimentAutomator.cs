@@ -27,6 +27,10 @@ namespace DigitalTwin
         [Header("Configuración")]
         [Tooltip("Tiempo máximo (segundos) por segmento antes de forzar el siguiente.")]
         public float maxTimeoutSeconds = 300f;
+        [Tooltip("Si Hover queda detenido mas que esto, el episodio se descarta y se repite desde repostaje.")]
+        public float hoverStallRetrySeconds = 300f;
+        [Tooltip("Reintentos maximos por episodio cuando Hover se queda bloqueado. 0 = ilimitado.")]
+        public int maxHoverEpisodeRetries = 3;
         [Tooltip("Número de segmentos por episodio")]
         public int segmentsPerEpisode = 20;
 
@@ -262,33 +266,21 @@ namespace DigitalTwin
             globalTableData.Add(globalHeader);
 
             var permutations = new List<(int t, int a, int s)>();
-            int[] phase1Strategies = { 1, 2, 4 };
-            for (int t = 0; t <= 2; t++)
-                for (int a = 0; a <= 2; a++)
-                    foreach (int s in phase1Strategies)
-                        permutations.Add((t, a, s));
-            for (int t = 0; t <= 2; t++)
-                for (int a = 0; a <= 2; a++)
-                    permutations.Add((t, a, 3));
-
-            // Filtrar a solo 9 episodios de grabación si el modo está activo
             if (recordingMode)
             {
-                var recordingEpisodes = new HashSet<(int, int, int)>
-                {
-                    (0, 0, 1),  // Low-Low-Baseline
-                    (0, 1, 3),  // Low-Medium-Micro
-                    (0, 2, 1),  // Low-High-Baseline
-                    (1, 0, 2),  // Medium-Low-Hover
-                    (1, 1, 1),  // Medium-Medium-Baseline
-                    (1, 2, 3),  // Medium-High-Micro
-                    (2, 0, 4),  // High-Low-Skip
-                    (2, 1, 3),  // High-Medium-Micro
-                    (2, 2, 2)   // High-High-Hover
-                };
-                permutations = permutations.FindAll(p => recordingEpisodes.Contains(p));
-                Debug.Log($"[Automator] 🎬 MODO GRABACIÓN ACTIVO — {permutations.Count} episodios seleccionados");
+                permutations.Add((2, 2, 2));
+                Debug.Log("[Automator] 🎬 MODO GRABACIÓN ACTIVO — ejecutando solo Hover + Traffic High + Height High");
             }
+            else
+            {
+                int[] strategiesInOrder = { 1, 2, 3, 4 }; // Baseline, Hover, Micro, Skip
+                for (int t = 0; t <= 2; t++)
+                    for (int a = 0; a <= 2; a++)
+                        foreach (int s in strategiesInOrder)
+                            permutations.Add((t, a, s));
+            }
+
+            int[] hoverRetryCounts = new int[permutations.Count];
 
             for (int ep = 0; ep < permutations.Count; ep++)
             {
@@ -300,6 +292,13 @@ namespace DigitalTwin
 
                 var (t, a, s) = permutations[ep];
 
+                // En modo grabación, solo se ejecuta la combinación exacta Hover + Traffic High + Height High
+                if (recordingMode && (t != 2 || a != 2 || s != 2))
+                {
+                    Debug.Log($"[Automator] ⏭ Episodio #{ep + 1} no requiere grabación (solo Hover + Traffic High + Height High), saltando.");
+                    continue;
+                }
+
                 SetAltitude(a);
                 SetNavigation(s);
 
@@ -309,21 +308,43 @@ namespace DigitalTwin
 
                 Debug.Log($"[Automator] ▶▶▶ Episodio #{ep + 1}/{permutations.Count} | {trafficStr} / {altStr} / {navStr}");
 
-                // Iniciar grabación de video si el modo grabación está activo
-                if (recordingMode && videoRecorder != null)
+                // Iniciar grabación de video solo cuando el modo grabación está activo y la estrategia es Hover
+                bool shouldRecord = recordingMode && s == 2;
+                if (recordingMode && videoRecorder != null && shouldRecord)
                 {
+                    Debug.Log($"[Automator] 🎥 GRABANDO Episodio #{ep + 1} (Hover)");
                     videoRecorder.StartRecording(ep + 1);
                 }
 
                 StreetSummary res = new StreetSummary();
+                bool retryEpisode = false;
                 yield return StartCoroutine(RunTwentySegments(
                     t, a, s, trafficStr, altStr, navStr,
-                    summary => res = summary));
+                    (summary, retry) =>
+                    {
+                        res = summary;
+                        retryEpisode = retry;
+                    }));
 
                 // Detener grabación de video si estaba activa
-                if (recordingMode && videoRecorder != null)
+                if (recordingMode && videoRecorder != null && shouldRecord)
                 {
                     videoRecorder.StopRecording();
+                }
+
+                if (retryEpisode)
+                {
+                    int retryIndex = ep;
+                    hoverRetryCounts[retryIndex]++;
+                    if (maxHoverEpisodeRetries > 0 && hoverRetryCounts[retryIndex] > maxHoverEpisodeRetries)
+                    {
+                        Debug.LogError($"[Automator] Episodio #{retryIndex + 1} excedio {maxHoverEpisodeRetries} reintentos Hover. Batch detenido para evitar datos invalidos.");
+                        yield break;
+                    }
+
+                    ep--;
+                    Debug.LogWarning($"[Automator] Reintentando episodio #{retryIndex + 1} por Hover bloqueado ({hoverRetryCounts[retryIndex]}/{(maxHoverEpisodeRetries <= 0 ? "inf" : maxHoverEpisodeRetries.ToString())}). No se guardan metricas de este intento.");
+                    continue;
                 }
 
                 var ic = System.Globalization.CultureInfo.InvariantCulture;
@@ -352,7 +373,7 @@ namespace DigitalTwin
             PlayerPrefs.DeleteKey(PREFS_EPISODE_DATA);
             PlayerPrefs.Save();
 
-            int totalCompleted = recordingMode ? 9 : 36;
+            int totalCompleted = permutations.Count;
             Debug.Log("[Automator] ══════════════════════════════════════════");
             Debug.Log($"[Automator]  ✅ BATCH TERMINADO — {totalCompleted} episodios completados");
             Debug.Log($"[Automator]  📊 CSV: {finalPath}");
@@ -364,7 +385,7 @@ namespace DigitalTwin
         private IEnumerator RunTwentySegments(
             int trafficLevel, int altLevel, int navLevel,
             string trafficStr, string altStr, string navStr,
-            System.Action<StreetSummary> onComplete)
+            System.Action<StreetSummary, bool> onComplete)
         {
             // Obtener DigitalTwinManager (con fallback)
             DigitalTwinManager dtm = DigitalTwinManager.Instance ?? FindFirstObjectByType<DigitalTwinManager>(FindObjectsInactive.Include);
@@ -448,6 +469,18 @@ namespace DigitalTwin
 
                     while (!droneController.segmentDone)
                     {
+                        if (navLevel == (int)NavigationMode.Hover &&
+                            droneController != null &&
+                            droneController.IsHoveringForObstacle() &&
+                            droneController.currentHoverWaitTime >= hoverStallRetrySeconds)
+                        {
+                            Debug.LogWarning($"[Automator] Hover bloqueado {droneController.currentHoverWaitTime:F1}s en '{segName}'. Volviendo a repostaje y repitiendo episodio.");
+                            yield return StartCoroutine(AbortEpisodeAndReturnToBase(dtm));
+                            if (onComplete != null)
+                                onComplete(new StreetSummary(), true);
+                            yield break;
+                        }
+
                         if (Time.time - segStart >= maxTimeoutSeconds)
                         {
                             Debug.LogWarning($"[Automator] ⚠ Timeout '{segName}'. Forzando.");
@@ -543,7 +576,25 @@ namespace DigitalTwin
             Debug.Log($"[Automator] ✅ Episodio completado. {segResults.Count} segs | Coverage={summary.avgCoverage:F1}%");
 
             if (onComplete != null)
-                onComplete(summary);
+                onComplete(summary, false);
+        }
+
+        private IEnumerator AbortEpisodeAndReturnToBase(DigitalTwinManager dtm)
+        {
+            if (droneController != null)
+            {
+                droneController.ReturnToBase();
+                float returnStart = Time.time;
+                while (!droneController.IsAtBase() && Time.time - returnStart < maxTimeoutSeconds)
+                    yield return null;
+            }
+
+            if (dtm != null)
+            {
+                dtm.suppressAutoEndEpisode = false;
+                if (dtm.isEpisodeActive)
+                    dtm.EndEpisode();
+            }
         }
 
         private string BuildGlobalHeader()
