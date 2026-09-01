@@ -402,14 +402,14 @@ def load_yolo_from_checkpoint(ckpt):
     skipped = len(yolo_state) - len(compatible)
     missing, unexpected = nn_model.load_state_dict(compatible, strict=False)
 
-    print(f"[model.pt] Compatible YOLO weights loaded: {len(compatible)}")
-    print(f"[model.pt] Skipped YOLO weights by shape/name: {skipped}")
+    print(f"[model.pt] Pesos YOLO compatibles cargados: {len(compatible)}")
+    print(f"[model.pt] Pesos YOLO omitidos por forma/nombre: {skipped}")
 
     if missing:
-        print(f"[model.pt] YOLO missing keys: {len(missing)}")
+        print(f"[model.pt] YOLO claves faltantes: {len(missing)}")
 
     if unexpected:
-        print(f"[model.pt] YOLO unexpected keys: {unexpected}")
+        print(f"[model.pt] YOLO claves inesperadas: {unexpected}")
 
     yolo = YOLO(base_cfg)
     yolo.model = nn_model
@@ -433,13 +433,13 @@ def load_model():
     global roi_size
 
     print("\n========================================")
-    print("LOADING API model.pt")
+    print("CARGANDO API model.pt")
     print("========================================")
-    print(f"Model path: {MODEL_PATH}")
+    print(f"Modelo: {MODEL_PATH}")
     print(f"Device: {DEVICE}")
 
     if not os.path.exists(MODEL_PATH):
-        raise RuntimeError(f"model.pt not found at: {MODEL_PATH}")
+        raise RuntimeError(f"No se encontro model.pt en: {MODEL_PATH}")
 
     os.makedirs(DETECTIONS_DIR, exist_ok=True)
 
@@ -457,12 +457,12 @@ def load_model():
 
         if checkpoint_subtype_names and checkpoint_subtype_names != subtype_names:
             print(
-                f"Checkpoint subtypes ignored: {checkpoint_subtype_names}. "
-                f"Using corrected order: {subtype_names}"
+                f"Subtipos del checkpoint ignorados: {checkpoint_subtype_names}. "
+                f"Usando orden corregido: {subtype_names}"
             )
 
-        print(f"Detector classes: {detection_names}")
-        print(f"Subtype classes: {subtype_names}")
+        print(f"Clases detector: {detection_names}")
+        print(f"Clases subtipo: {subtype_names}")
         print(f"ROI size: {roi_size}")
 
         subtype_state = {
@@ -473,15 +473,15 @@ def load_model():
 
         if subtype_state:
             subtype_head = build_subtype_head(subtype_state)
-            print("subtype_head loaded from model.pt")
+            print("subtype_head cargado desde model.pt")
 
         detector = load_yolo_from_checkpoint(checkpoint)
     else:
         detector = YOLO(MODEL_PATH)
         model_load_mode = "ultralytics_direct"
 
-    print(f"Loading mode: {model_load_mode}")
-    print("API model.pt ready.")
+    print(f"Modo de carga: {model_load_mode}")
+    print("API model.pt lista.")
     print("========================================\n")
 
 
@@ -495,9 +495,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="AI Pothole & Road Defect Detector",
-    description="Inference API using PyTorch model.pt checkpoint",
-    version="2.0",
+    title="Detector IA model.pt",
+    description="API de inferencia usando Assets/Scripts/IA/model.pt",
+    version="1.1",
     lifespan=lifespan
 )
 
@@ -522,22 +522,22 @@ app.mount("/detections", StaticFiles(directory=DETECTIONS_DIR), name="detections
 def predict_image(file: UploadFile = File(...)):
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
     print(f"\n==================================================")
-    print(f"[REQ /predict] {now_str} | File: '{file.filename}'")
+    print(f"[REQ /predict] {now_str} | Archivo: '{file.filename}'")
     try:
         contents = file.file.read()
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
         if img is None:
-            print(f"[REQ /predict] ❌ ERROR: Invalid or empty image (bytes: {len(contents)})")
+            print(f"[REQ /predict] ❌ ERROR: Imagen invalida o vacia (bytes: {len(contents)})")
             print(f"==================================================\n")
             return JSONResponse(
                 status_code=400,
-                content={"error": "Invalid image format"}
+                content={"error": "Imagen invalida"}
             )
 
         h, w = img.shape[:2]
-        print(f"[REQ /predict] 🖼️  Dimensions: {w}x{h} px | Size: {len(contents)} bytes")
+        print(f"[REQ /predict] 🖼️  Dimensiones: {w}x{h} px | Peso: {len(contents)} bytes")
 
         results = detector.predict(
             img,
@@ -620,16 +620,16 @@ def predict_image(file: UploadFile = File(...)):
         cv2.imwrite(output_path, draw_img)
 
         print(
-            f"[REQ /predict] 🎯 Inference completed: raw={len(results[0].boxes)} | "
-            f"filtered={len(detections)}"
+            f"[REQ /predict] 🎯 Detecciones finalizadas: raw={len(results[0].boxes)} | "
+            f"filtradas={len(detections)}"
         )
-        print(f"[REQ /predict] 💾 ANNOTATED CAPTURE SAVED TO DISK -> {output_path}")
+        print(f"[REQ /predict] 💾 CAPTURA GUARDADA EN DISCO -> {output_path}")
         print(f"==================================================\n")
 
         return JSONResponse(content=detections)
 
     except Exception as exc:
-        print(f"[REQ /predict] ❌ INFERENCE ERROR: {exc}\n")
+        print(f"[REQ /predict] ❌ ERROR EN INFERENCIA: {exc}\n")
         print(f"==================================================\n")
 
         return JSONResponse(
@@ -656,12 +656,12 @@ def health():
 def root():
     return JSONResponse(
         content={
-            "status": "AI model.pt inference server active",
-            "model": os.path.basename(MODEL_PATH),
-            "load_mode": model_load_mode,
+            "estado": "Servidor IA model.pt activo",
+            "modelo": os.path.basename(MODEL_PATH),
+            "modo_carga": model_load_mode,
             "device": DEVICE,
-            "detector_classes": list(detection_names),
-            "subtype_classes": list(subtype_names),
+            "clases_detector": list(detection_names),
+            "clases_subtipo": list(subtype_names),
             "roi_size": roi_size,
             "feature_layer_index": FEATURE_LAYER_INDEX
         }

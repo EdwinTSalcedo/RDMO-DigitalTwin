@@ -34,12 +34,12 @@ namespace DigitalTwin
         public Dictionary<RoadSegment, SegmentStatus> inspectionMemory = new Dictionary<RoadSegment, SegmentStatus>();
         public List<RoadSegment> revisitQueue = new List<RoadSegment>();
 
-        [Header("Test Mode")]
-        [Tooltip("If enabled, frame captures are not sent to Python and detections are simulated using raycasts.")]
+        [Header("Modo Prueba")]
+        [Tooltip("Si está activo, no se envían capturas al servidor Python y las detecciones se simulan con raycast.")]
         public bool testModeNoPython = false;
-        [Tooltip("Simulated pothole evaluation window in test mode.")]
+        [Tooltip("Ventana de baches simulados en modo prueba. 4 significa evaluar grupos de 4.")]
         public int testModeConfirmEvery = 4;
-        [Tooltip("Number of confirmed potholes per evaluation window.")]
+        [Tooltip("Cuantos baches se confirman dentro de cada ventana. 3 de 4 deja 1 fallido para probar Skip.")]
         public int testModeConfirmCount = 3;
 
         [Header("Referencias a Sistemas Reales")]

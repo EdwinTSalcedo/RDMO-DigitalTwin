@@ -22,15 +22,15 @@ public class PythonInferenceClient : MonoBehaviour
     public int maxConcurrentRequests = 3;
     private int inFlightRequests = 0;
 
-    // JSON response DTOs
+    // Clases para parsear el JSON
     [Serializable]
     public class BoxData {
         public string @class;
         public string clase;
-        public float cls_conf;
-        public float det_conf;
+        public float cls_conf;  // Confianza del clasificador (desde Python)
+        public float det_conf;  // Confianza de detección YOLO
         public int[] box;
-        public int[] caja;
+        public int[] caja; // [x1, y1, x2, y2]
 
         public string ClassName => !string.IsNullOrEmpty(@class) ? @class : clase;
         public int[] BoxCoords => (box != null && box.Length > 0) ? box : caja;
@@ -54,7 +54,7 @@ public class PythonInferenceClient : MonoBehaviour
 #endif
     }
 
-    // Public method called from MovementInterface
+    // Método público para ser llamado desde MovementInterface
     public void AnalyzeImageBytes(byte[] imageBytes, string imageID)
     {
         if (!CanStartRequest(imageID)) return;
@@ -69,9 +69,11 @@ public class PythonInferenceClient : MonoBehaviour
 
     IEnumerator SendFrameToPython(byte[] imageBytes, string imageID, string candidateID, Vector3 candidateWorldPosition, string candidateTag)
     {
+        // Crear formulario Multipart
         WWWForm form = new WWWForm();
         form.AddBinaryData("file", imageBytes, imageID, "image/png");
 
+        // Enviar petición POST a Python
         using (UnityWebRequest www = UnityWebRequest.Post(apiUrl, form))
         {
             yield return www.SendWebRequest();
@@ -85,12 +87,12 @@ public class PythonInferenceClient : MonoBehaviour
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[AI API -> {imageID}] Error parsing response: {ex.Message}");
+                    Debug.LogError($"[IA API -> {imageID}] Error parseando respuesta: {ex.Message}");
                 }
             }
             else
             {
-                Debug.LogWarning($"Connection error with Python while analyzing {imageID}: {www.error}");
+                Debug.LogWarning($"Error de conexión con Python al analizar {imageID}: {www.error}");
             }
         }
 
@@ -101,7 +103,7 @@ public class PythonInferenceClient : MonoBehaviour
     {
         if (inFlightRequests >= Mathf.Max(1, maxConcurrentRequests))
         {
-            Debug.LogWarning($"[AI API -> {imageID}] Frame skipped: too many pending requests ({inFlightRequests}/{maxConcurrentRequests}).");
+            Debug.LogWarning($"[IA API -> {imageID}] Captura descartada: demasiadas solicitudes pendientes ({inFlightRequests}/{maxConcurrentRequests}).");
             return false;
         }
 
@@ -124,16 +126,16 @@ public class PythonInferenceClient : MonoBehaviour
                 detectionID,
                 candidateWorldPosition,
                 candidateTag,
-                "AI API");
-            string obstacleLabel = candidateTag == "Car" ? "car" : "person";
-            Debug.Log($"[AI API -> {imageID}] {char.ToUpper(obstacleLabel[0])}{obstacleLabel.Substring(1)} detected by raycast; ignored for pothole detection.");
+                "IA API");
+            string obstacleLabel = candidateTag == "Car" ? "auto" : "persona";
+            Debug.Log($"[IA API -> {imageID}] {char.ToUpper(obstacleLabel[0])}{obstacleLabel.Substring(1)} detectado por raycast; se ignora para detección de baches y se deja al hover.");
             return;
         }
 
         var detections = data?.DetectionsList;
         if (detections == null || detections.Length == 0)
         {
-            Debug.Log($"[AI API -> {imageID}] No valid detections.");
+            Debug.Log($"[IA API -> {imageID}] Sin detecciones validas.");
             return;
         }
 
@@ -182,9 +184,9 @@ public class PythonInferenceClient : MonoBehaviour
         if (!isSkipRevisit && firstDamageBox == null)
         {
             if (!isSkipRevisit && damageOutsideCenterBand > 0)
-                Debug.Log($"[AI API -> {imageID}] Potholes ignored (outside center band): {damageOutsideCenterBand}.");
+                Debug.Log($"[IA API -> {imageID}] Baches ignorados por estar fuera de la franja central: {damageOutsideCenterBand}.");
             else
-                Debug.Log($"[AI API -> {imageID}] No potholes confirmed in this frame.");
+                Debug.Log($"[IA API -> {imageID}] No se confirmo ningun bache en esta imagen.");
             return;
         }
 
@@ -192,28 +194,28 @@ public class PythonInferenceClient : MonoBehaviour
         {
             if (centerDamageBox == null || centerDistance > skipRevisitCenterRadiusPixels)
             {
-                Debug.Log($"[AI API -> {imageID}] Revisit detection ignored: pothole outside center ({centerDistance:F1}px > {skipRevisitCenterRadiusPixels:F1}px).");
+                Debug.Log($"[IA API -> {imageID}] Deteccion ignorada en revisita Skip: bache fuera del centro ({centerDistance:F1}px > {skipRevisitCenterRadiusPixels:F1}px).");
                 return;
             }
 
-            Debug.Log($"[AI API -> {imageID}] Skip revisit confirmed by centered pothole: {centerDamageBox.ClassName} ({centerDamageBox.cls_conf * 100:F1}%).");
+            Debug.Log($"[IA API -> {imageID}] Revisita Skip confirmada por bache centrado: {centerDamageBox.ClassName} ({centerDamageBox.cls_conf * 100:F1}%).");
             if (mi != null)
             {
                 mi.RegisterSkipRevisitDiscoveredDamage(detectionID);
                 mi.RegisterSkipRevisitDetection(detectionID);
-                Debug.Log($"[AI API] 1 pothole recovered in Skip revisit. ID: {detectionID}");
+                Debug.Log($"[IA API] 1 bache recuperado en revisita Skip. ID: {detectionID}");
             }
             return;
         }
         else
         {
-            Debug.Log($"[AI API -> {imageID}] Pothole confirmed: {firstDamageBox.ClassName} ({firstDamageBox.cls_conf * 100:F1}%).");
+            Debug.Log($"[IA API -> {imageID}] Bache confirmado: {firstDamageBox.ClassName} ({firstDamageBox.cls_conf * 100:F1}%).");
         }
 
         if (mi != null)
         {
             mi.RegisterSegmentDetection(detectionID);
-            Debug.Log($"[AI API] 1 pothole confirmed. ID: {detectionID}");
+            Debug.Log($"[IA API] 1 bache confirmado. ID: {detectionID}");
         }
     }
 
