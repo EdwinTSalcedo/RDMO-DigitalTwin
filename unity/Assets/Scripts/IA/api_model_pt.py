@@ -604,6 +604,18 @@ def predict_image(file: UploadFile = File(...)):
         )
 
 
+@app.get("/health")
+def health():
+    return JSONResponse(
+        content={
+            "ready": detector is not None,
+            "modelo": os.path.basename(MODEL_PATH),
+            "modo_carga": model_load_mode,
+            "device": DEVICE
+        }
+    )
+
+
 @app.get("/")
 def root():
     return JSONResponse(

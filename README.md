@@ -73,7 +73,7 @@ The deployed checkpoint is: `models/model_finetuned.pt`. Start the server from t
 
 ```bash
 source .venv/bin/activate
-python unity/Assets/Scripts/AI/api_model_pt.py
+python unity/Assets/Scripts/IA/api_model_pt.py
 ```
 
 Then, the server should allow inference at: `http://127.0.0.1:5000`. For a health check, use:
@@ -104,7 +104,7 @@ Example response:
 Annotated server outputs are written to:
 
 ```text
-unity/Assets/Scripts/AI/Detecciones_model_pt/
+unity/Assets/Scripts/IA/Detecciones_model_pt/
 ```
 
 ### 4. Run the simulator
@@ -300,26 +300,35 @@ The experiments reported in the paper were run on a desktop with an AMD Ryzen 5 
 
 ```text
 RDMO-DigitalTwin/
+|-- LICENSE.md
 |-- README.md
 |-- assets/
-|   |-- gifs/                  # README animations of the project
-|   |-- images/                # Figures and visual examples
+|   |-- gifs/                    # README animations of the project
+|   |-- images/                  # Figures and visual examples
 |   `-- videos/
 |       |-- recorded_experiments/ # Experiment recordings and CSV manifest
 |       |-- uav_view_back.mp4
 |       `-- uav_view_topview.mp4
 |-- models/
-|   |-- model_base.pt          # Baseline checkpoint
-|   `-- model_finetuned.pt     # Deployed checkpoint
+|   |-- model_base.pt            # Baseline checkpoint
+|   `-- model_finetuned.pt       # Deployed checkpoint
 |-- notebooks/
 |   `-- multimodal_uav_detector.ipynb # Multitask detector notebook
 |-- results/
-|   |-- uav_segment_results.csv # Per-segment UAV recovery-strategy results
-|   `-- uav_summary_results.csv # Aggregated recovery-strategy summaries
-`-- unity/
-    |-- Assets/
-    |-- Packages/
-    `-- ProjectSettings/
+|   |-- uav_segment_results.csv  # Per-segment UAV recovery-strategy results
+|   `-- uav_summary_results.csv  # Aggregated recovery-strategy summaries
+|-- simulator/
+|   |-- PotholeDetector.exe      # Windows desktop simulator build
+|   `-- PotholeDetector_Data/    # Unity runtime data for the desktop build
+|-- unity/
+|   |-- Assets/
+|   |-- Packages/
+|   `-- ProjectSettings/
+`-- web/
+    |-- media/                   # Web copies of project images and videos
+    |-- paper-web/               # Academic project page
+    |-- project-web/             # RDMO project overview site
+    `-- simulator-web/           # Unity WebGL simulator build
 ```
 
 ## 9. Citation
