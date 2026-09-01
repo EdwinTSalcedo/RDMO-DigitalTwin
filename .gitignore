@@ -82,27 +82,30 @@ unity/DigitalTwin_Logs/
 unity/Assets/DigitalTwin_Logs/
 unity/**/*.csv
 unity/**/*.log
-unity/Assets/Scripts/AI/Detecciones_IA/
-unity/Assets/Scripts/AI/Detecciones IA/
-unity/Assets/Scripts/AI/Detecciones_model_pt/
-unity/Assets/Scripts/AI/debug_crops/
-unity/Assets/Scripts/AI/runs/
-unity/Assets/Scripts/AI/imagen*.jpg
-unity/Assets/Scripts/AI/resultado_*.jpg
+unity/Assets/Scripts/IA/Detecciones_IA/
+unity/Assets/Scripts/IA/Detecciones IA/
+unity/Assets/Scripts/IA/Detecciones_model_pt/
+unity/Assets/Scripts/IA/debug_crops/
+unity/Assets/Scripts/IA/runs/
+unity/Assets/Scripts/IA/imagen*.jpg
+unity/Assets/Scripts/IA/resultado_*.jpg
 
 # ======================
 # Unity-side model binaries and generated AI artifacts
 # The deployed checkpoints live in root models/ and are intentionally trackable.
 # ======================
-unity/Assets/Scripts/AI/*.pt
-unity/Assets/Scripts/AI/*.pth
-unity/Assets/Scripts/AI/*.onnx
+unity/Assets/Scripts/IA/*.pt
+unity/Assets/Scripts/IA/*.pth
+unity/Assets/Scripts/IA/*.onnx
 
 # ======================
 # Experiment/training artifacts outside the Unity project
 # ======================
 data/
-docs/
+docs/*
+!docs/DEPLOYMENT.md
+!docs/LOG.md
+!docs/MODEL_CARD.md
 results/*.xlsx
 results/uav_results.csv
 experiments/runs/
@@ -123,13 +126,3 @@ unity-backup/
 !models/
 !models/model_base.pt
 !models/model_finetuned.pt
-
-unity/Detector de baches/
-
-unity/Detector de baches/
-unity/Detector_Baches/
-unity/Detector_baches_web/
-unity/PRUEBALC/
-unity/DigitalTwin_Logs/
-
-unity/Assets/Scripts/IA/debug_crops/

@@ -64,7 +64,7 @@ From the repository root:
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install torch torchvision ultralytics fastapi "uvicorn[standard]" python-multipart opencv-python numpy
+python -m pip install -r requirements.txt
 ```
 
 ### 3. Start the model server
@@ -282,10 +282,19 @@ Important files:
 - Any modern desktop browser with **WebAssembly** and **WebGL 2** support (Chrome, Edge, or Firefox recommended).
 - A mid-range or better GPU is recommended for acceptable frame rates.
 - At least **4 GB of RAM** available for the browser tab.
-- To run it locally from the repository, start the included server:
+- To run it locally from the repository, start a static file server:
+
+  Windows:
   ```bat
   web\simulator-web\start_server.bat
   ```
+
+  macOS/Linux:
+  ```bash
+  cd web/simulator-web
+  python3 -m http.server 8766 --bind 127.0.0.1
+  ```
+
   Then open `http://127.0.0.1:8766` in your browser.
 
 ### Python inference server
@@ -302,6 +311,7 @@ The experiments reported in the paper were run on a desktop with an AMD Ryzen 5 
 RDMO-DigitalTwin/
 |-- LICENSE.md
 |-- README.md
+|-- requirements.txt
 |-- assets/
 |   |-- gifs/                    # README animations of the project
 |   |-- images/                  # Figures and visual examples
@@ -309,6 +319,10 @@ RDMO-DigitalTwin/
 |       |-- recorded_experiments/ # Experiment recordings and CSV manifest
 |       |-- uav_view_back.mp4
 |       `-- uav_view_topview.mp4
+|-- docs/
+|   |-- DEPLOYMENT.md           # Unity + Python server deployment guide
+|   |-- LOG.md                  # Project experiment log
+|   `-- MODEL_CARD.md           # Model architecture, metrics, and limitations
 |-- models/
 |   |-- model_base.pt            # Baseline checkpoint
 |   `-- model_finetuned.pt       # Deployed checkpoint

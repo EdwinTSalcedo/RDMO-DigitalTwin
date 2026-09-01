@@ -106,7 +106,7 @@ El simulador funciona con **una interfaz central (Mode_Menu)** que controla el a
 
 ### 🔴 Paso 1: Iniciar la Aplicación
 
-1. Abre el proyecto en **Unity 2022 LTS** o superior.
+1. Abre el proyecto en **Unity 6000.2.14f1**.
 2. Carga la escena `Mode_Menu.unity` desde `Assets/Scenes/`.
 3. Presiona **Play (▶️)**.
 

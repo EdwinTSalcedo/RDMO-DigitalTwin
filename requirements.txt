@@ -1,0 +1,15 @@
+# Python inference server
+torch>=2.2
+torchvision>=0.17
+ultralytics==8.4.76
+fastapi>=0.111,<1
+uvicorn[standard]>=0.30,<1
+python-multipart>=0.0.9,<1
+opencv-python>=4.9,<5
+numpy>=1.24,<3
+
+# Notebook and dataset checks
+pandas>=2.0,<3
+matplotlib>=3.7,<4
+pyyaml>=6,<7
+tqdm>=4.66,<5
