@@ -129,7 +129,7 @@ public class PotholeCaptureManager : MonoBehaviour
 
     private void SetupTemporaryFolder()
     {
-        string tempFolder = @"E:\PotholeCaptureData";
+        string tempFolder = System.IO.Path.Combine(Application.persistentDataPath, "PotholeCaptureData");
         
         FileHandler.SetCustomFolder(tempFolder);
         Debug.Log($"<color=cyan>[PotholeCaptureManager] Carpeta temporal configurada: {tempFolder}</color>");
@@ -137,7 +137,7 @@ public class PotholeCaptureManager : MonoBehaviour
 
     private void SetupFolderForHeight(float height)
     {
-        string baseFolder = @"E:\PotholeCaptureData";
+        string baseFolder = System.IO.Path.Combine(Application.persistentDataPath, "PotholeCaptureData");
         string heightFolder = System.IO.Path.Combine(baseFolder, $"{height:F0}meters");
         
         // Crear carpeta si no existe

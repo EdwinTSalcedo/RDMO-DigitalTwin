@@ -9,7 +9,9 @@ import torch.nn as nn
 import uvicorn
 
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from ultralytics import YOLO
 
 try:
@@ -24,10 +26,16 @@ except Exception:
     yaml_model_load = None
 
 
-# =========================================================
-# CONFIG
-# =========================================================
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+def get_optimal_device():
+    if os.getenv("DEVICE"):
+        return os.getenv("DEVICE")
+    if torch.cuda.is_available():
+        return "cuda"
+    if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
+
+DEVICE = get_optimal_device()
 
 IMG_SIZE = 640
 YOLO_CONF = 0.40
@@ -44,9 +52,13 @@ SUBTYPE_CONF = 0.80
 FEATURE_LAYER_INDEX = None
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_FILENAME = "model_finetuned.pt"
-MODEL_PATH = os.path.join(BASE_DIR, MODEL_FILENAME)
-DETECTIONS_DIR = os.path.join(BASE_DIR, "Detecciones_model_pt")
+MODEL_PATH = os.getenv("MODEL_PATH")
+if not MODEL_PATH or not os.path.exists(MODEL_PATH):
+    MODEL_PATH = os.path.join(BASE_DIR, "models", "model_finetuned.pt")
+if not os.path.exists(MODEL_PATH):
+    MODEL_PATH = os.path.join(BASE_DIR, "model_finetuned.pt")
+
+DETECTIONS_DIR = os.getenv("DETECTIONS_DIR", os.path.join(BASE_DIR, "detections"))
 
 DEFAULT_DETECTION_NAMES = (
     "Road-defect-general",
@@ -489,24 +501,43 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+os.makedirs(DETECTIONS_DIR, exist_ok=True)
+app.mount("/detections", StaticFiles(directory=DETECTIONS_DIR), name="detections")
+
 
 # =========================================================
 # PREDICT
 # =========================================================
 @app.post("/predict")
+@app.post("/api/predict")
+@torch.inference_mode()
 def predict_image(file: UploadFile = File(...)):
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    print(f"\n==================================================")
+    print(f"[REQ /predict] {now_str} | Archivo: '{file.filename}'")
     try:
         contents = file.file.read()
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
         if img is None:
+            print(f"[REQ /predict] ❌ ERROR: Imagen invalida o vacia (bytes: {len(contents)})")
+            print(f"==================================================\n")
             return JSONResponse(
                 status_code=400,
                 content={"error": "Imagen invalida"}
             )
 
         h, w = img.shape[:2]
+        print(f"[REQ /predict] 🖼️  Dimensiones: {w}x{h} px | Peso: {len(contents)} bytes")
 
         results = detector.predict(
             img,
@@ -575,9 +606,11 @@ def predict_image(file: UploadFile = File(...)):
                 label = "Car"
 
             detections.append({
+                "class": label,
                 "clase": label,
                 "det_conf": round(det_conf, 3),
                 "cls_conf": round(cls_conf, 3) if cls_conf is not None else None,
+                "box": [x1, y1, x2, y2],
                 "caja": [x1, y1, x2, y2]
             })
 
@@ -587,16 +620,17 @@ def predict_image(file: UploadFile = File(...)):
         cv2.imwrite(output_path, draw_img)
 
         print(
-            f"[predict model.pt] raw={len(results[0].boxes)} "
-            f"kept={len(detections)} "
-            f"dropped={max(0, len(results[0].boxes) - len(detections))} "
-            f"saved={output_path}"
+            f"[REQ /predict] 🎯 Detecciones finalizadas: raw={len(results[0].boxes)} | "
+            f"filtradas={len(detections)}"
         )
+        print(f"[REQ /predict] 💾 CAPTURA GUARDADA EN DISCO -> {output_path}")
+        print(f"==================================================\n")
 
         return JSONResponse(content=detections)
 
     except Exception as exc:
-        print(f"\nERROR model.pt:\n{exc}\n")
+        print(f"[REQ /predict] ❌ ERROR EN INFERENCIA: {exc}\n")
+        print(f"==================================================\n")
 
         return JSONResponse(
             status_code=500,
@@ -605,9 +639,11 @@ def predict_image(file: UploadFile = File(...)):
 
 
 @app.get("/health")
+@app.get("/api/health")
 def health():
     return JSONResponse(
         content={
+            "status": "ok",
             "ready": detector is not None,
             "modelo": os.path.basename(MODEL_PATH),
             "modo_carga": model_load_mode,

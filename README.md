@@ -42,7 +42,43 @@ The framework integrates:
 
 ## 2. Quick Start
 
-### 1. Open the Unity project
+### Option A: Docker Web Simulator (Recommended - 1-Click / Command)
+
+Run the full Digital Twin 3D simulator and YOLOv8 perception backend inside Docker containers with zero manual Python environment setup:
+
+#### 🪟 Windows Setup & Execution
+1. **Prerequisites:** Install [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/) with WSL2 backend enabled.
+2. **Start Services:** Run `docker compose up -d` in terminal (or double-click `start_windows.bat`).
+3. **Open Simulator:** Open your web browser and navigate to:  
+   👉 **`http://localhost/`**  
+   *(Verified and compatible with Google Chrome, Microsoft Edge, and Mozilla Firefox).*
+4. **AI Detections Output:** Processed images with bounding boxes and defect labels are automatically saved on your host computer in:  
+   📁 `./detections_output/`  
+   *(or accessible via browser at `http://localhost/api/detections/<image_name>.jpg`).*
+5. **Stop Services:** Run `docker compose down` (or double-click `stop_windows.bat`).
+
+#### 🐧 Linux Setup & Execution (Ubuntu / Linux Mint / Debian)
+1. **Prerequisites:** Install Docker and the Docker Compose plugin (`sudo apt install docker-compose-plugin`).
+2. **GPU Acceleration (Optional):** Install [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) for fast GPU inference (~10–15 ms per frame).
+3. **Start Services:** Run:
+   ```bash
+   docker compose up -d
+   ```
+4. **Open Simulator (Browser Recommendation):**  
+   - On Linux systems (especially laptops with hybrid Intel/NVIDIA graphics), **Mozilla Firefox** launched with dedicated GPU provides the smoothest WebGL 2.0 3D hardware-accelerated rendering.
+   - **Launch with GPU:** Right-click the Firefox icon and select *"Run with Dedicated Graphics Card"*, or run via terminal:
+     ```bash
+     MOZ_ENABLE_WAYLAND=0 __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia firefox http://localhost &
+     ```
+5. **AI Detections Output:** Annotated captures are automatically saved on your host machine in:  
+   📁 `./detections_output/`
+6. **Stop Services:** Run `docker compose down`.
+
+---
+
+### Option B: Native Unity Editor & Python Server
+
+#### 1. Open the Unity project
 
 The Unity project root is: `unity/`. Open that folder in Unity Hub. The project was last configured with: `Unity 6000.2.14f1`.
 
@@ -56,7 +92,7 @@ The main scenes are registered in `unity/ProjectSettings/EditorBuildSettings.ass
 | `Assets/Scenes/Mode_Data.unity` | Batch experiment and data mode. |
 | `Assets/Scenes/Mode_Capture.unity` | Dataset capture mode. |
 
-### 2. Create the Python environment
+#### 2. Create the Python environment
 
 From the repository root:
 
@@ -67,7 +103,7 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-### 3. Start the model server
+#### 3. Start the model server
 
 The deployed checkpoint is: `models/model_finetuned.pt`. Start the server from the repository root:
 
@@ -107,7 +143,7 @@ Annotated server outputs are written to:
 unity/Assets/Scripts/IA/Detecciones_model_pt/
 ```
 
-### 4. Run the simulator
+#### 4. Run the simulator
 
 1. Start the Python server.
 2. Open `unity/` in Unity Hub.

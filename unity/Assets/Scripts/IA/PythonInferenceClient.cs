@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -25,24 +25,36 @@ public class PythonInferenceClient : MonoBehaviour
     // Clases para parsear el JSON
     [Serializable]
     public class BoxData {
+        public string @class;
         public string clase;
         public float cls_conf;  // Confianza del clasificador (desde Python)
-        public float det_conf;  // Confianza de detecciÃ³n YOLO
+        public float det_conf;  // Confianza de detección YOLO
+        public int[] box;
         public int[] caja; // [x1, y1, x2, y2]
+
+        public string ClassName => !string.IsNullOrEmpty(@class) ? @class : clase;
+        public int[] BoxCoords => (box != null && box.Length > 0) ? box : caja;
     }
 
     [Serializable]
     public class ResponseData {
+        public BoxData[] detections;
         public BoxData[] detecciones;
+
+        public BoxData[] DetectionsList => (detections != null && detections.Length > 0) ? detections : detecciones;
     }
 
     void Awake()
     {
         Instance = this;
         skipRevisitCenterRadiusPixels = Mathf.Max(skipRevisitCenterRadiusPixels, 500f);
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        apiUrl = "/api/predict";
+#endif
     }
 
-    // MÃ©todo pÃºblico para ser llamado desde MovementInterface
+    // Método público para ser llamado desde MovementInterface
     public void AnalyzeImageBytes(byte[] imageBytes, string imageID)
     {
         if (!CanStartRequest(imageID)) return;
@@ -61,7 +73,7 @@ public class PythonInferenceClient : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddBinaryData("file", imageBytes, imageID, "image/png");
 
-        // Enviar peticiÃ³n POST a Python
+        // Enviar petición POST a Python
         using (UnityWebRequest www = UnityWebRequest.Post(apiUrl, form))
         {
             yield return www.SendWebRequest();
@@ -80,7 +92,7 @@ public class PythonInferenceClient : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"Error de conexiÃ³n con Python al analizar {imageID}: {www.error}");
+                Debug.LogWarning($"Error de conexión con Python al analizar {imageID}: {www.error}");
             }
         }
 
@@ -101,7 +113,7 @@ public class PythonInferenceClient : MonoBehaviour
 
     void ParsearYDibujarCajas(string jsonArray, string imageID, string candidateID, Vector3 candidateWorldPosition, string candidateTag)
     {
-        string wrappedJson = "{\"detecciones\":" + jsonArray + "}";
+        string wrappedJson = "{\"detections\":" + jsonArray + ",\"detecciones\":" + jsonArray + "}";
         ResponseData data = JsonUtility.FromJson<ResponseData>(wrappedJson);
 
         var mi = DigitalTwin.DigitalTwinManager.Instance?.movementInterface;
@@ -120,7 +132,8 @@ public class PythonInferenceClient : MonoBehaviour
             return;
         }
 
-        if (data.detecciones == null || data.detecciones.Length == 0)
+        var detections = data?.DetectionsList;
+        if (detections == null || detections.Length == 0)
         {
             Debug.Log($"[IA API -> {imageID}] Sin detecciones validas.");
             return;
@@ -135,16 +148,19 @@ public class PythonInferenceClient : MonoBehaviour
         float imgCY = inferenceImageHeight * 0.5f;
         float centerBandHalfHeight = normalCaptureCenterBandHeightPixels * 0.5f;
 
-        foreach (var box in data.detecciones)
+        foreach (var box in detections)
         {
-            string claseInf = box.clase.ToLower();
+            string claseInf = (box.ClassName ?? "").ToLower();
             bool esBache = claseInf.Contains("pothole") || claseInf.Contains("crack") || claseInf.Contains("crocodile");
             if (!esBache) continue;
 
+            var coords = box.BoxCoords;
+            if (coords == null || coords.Length < 4) continue;
+
             if (isSkipRevisit)
             {
-                float boxCX = (box.caja[0] + box.caja[2]) / 2f;
-                float boxCY = (box.caja[1] + box.caja[3]) / 2f;
+                float boxCX = (coords[0] + coords[2]) / 2f;
+                float boxCY = (coords[1] + coords[3]) / 2f;
                 float dist = Mathf.Sqrt((boxCX - imgCX) * (boxCX - imgCX) + (boxCY - imgCY) * (boxCY - imgCY));
 
                 if (dist < centerDistance)
@@ -155,7 +171,7 @@ public class PythonInferenceClient : MonoBehaviour
             }
             else
             {
-                float boxCY = (box.caja[1] + box.caja[3]) / 2f;
+                float boxCY = (coords[1] + coords[3]) / 2f;
                 bool isInsideCenterBand = Mathf.Abs(boxCY - imgCY) <= centerBandHalfHeight;
 
                 if (isInsideCenterBand && firstDamageBox == null)
@@ -182,7 +198,7 @@ public class PythonInferenceClient : MonoBehaviour
                 return;
             }
 
-            Debug.Log($"[IA API -> {imageID}] Revisita Skip confirmada por bache centrado: {centerDamageBox.clase} ({centerDamageBox.cls_conf * 100:F1}%).");
+            Debug.Log($"[IA API -> {imageID}] Revisita Skip confirmada por bache centrado: {centerDamageBox.ClassName} ({centerDamageBox.cls_conf * 100:F1}%).");
             if (mi != null)
             {
                 mi.RegisterSkipRevisitDiscoveredDamage(detectionID);
@@ -193,7 +209,7 @@ public class PythonInferenceClient : MonoBehaviour
         }
         else
         {
-            Debug.Log($"[IA API -> {imageID}] Bache confirmado: {firstDamageBox.clase} ({firstDamageBox.cls_conf * 100:F1}%).");
+            Debug.Log($"[IA API -> {imageID}] Bache confirmado: {firstDamageBox.ClassName} ({firstDamageBox.cls_conf * 100:F1}%).");
         }
 
         if (mi != null)
