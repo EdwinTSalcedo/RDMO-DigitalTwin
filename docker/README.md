@@ -1,10 +1,10 @@
-# 🐳 Docker Deployment Guide with GPU Acceleration
+# Docker Deployment Guide with GPU Acceleration
 
-This guide describes how to deploy and run the **RDMO Digital Twin & Real-Time Perception Platform** using **Docker Compose** with GPU acceleration (**NVIDIA / AMD / Intel**).
+This guide describes how to deploy and run the RDMO Digital Twin & Real-Time Perception Platform using Docker Compose, with browser GPU rendering support and optional NVIDIA CUDA acceleration for backend inference.
 
 ---
 
-## 🏗️ Service Architecture
+## Service Architecture
 
 | Service | Container | Port | Description |
 | :--- | :--- | :--- | :--- |
@@ -13,7 +13,7 @@ This guide describes how to deploy and run the **RDMO Digital Twin & Real-Time P
 
 ---
 
-## 🚀 1. Standard Docker Compose Startup
+## 1. Standard Docker Compose Startup
 
 Start all services with a single command:
 
@@ -21,12 +21,11 @@ Start all services with a single command:
 docker compose up -d
 ```
 
-Once the containers are running, open your web browser at:  
-👉 **`http://localhost/`**
+Once the containers are running, open the web browser at: `http://localhost/`
 
 ---
 
-## ⚡ 2. GPU Acceleration Setup
+## 2. GPU Acceleration Setup
 
 To achieve peak performance for 3D rendering and AI inference speed, enable GPU acceleration:
 
@@ -65,14 +64,14 @@ Enables YOLO model execution on GPU instead of CPU (reducing latency from ~200ms
 ### B. Frontend WebGL (3D Rendering at 60+ FPS)
 On laptops with hybrid graphics (Intel Integrated + NVIDIA Dedicated GPU), force dedicated GPU rendering for optimal frame rates:
 
-#### 🦊 Option 1: Firefox (Linux)
+#### Option 1: Firefox (Linux)
 - Right-click Firefox icon -> Select **"Run with Dedicated Graphics Card"**.
 - Or via terminal:
   ```bash
   MOZ_ENABLE_WAYLAND=0 __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia firefox http://localhost &
   ```
 
-#### 🌐 Option 2: Chrome / Microsoft Edge / Brave
+#### Option 2: Chrome / Microsoft Edge / Brave
 1. Go to `Settings -> System` and turn on: **"Use hardware acceleration when available"**.
 2. Open `chrome://flags` (or `edge://flags`) and set:
    - **Override software rendering list:** `Enabled`
@@ -80,7 +79,7 @@ On laptops with hybrid graphics (Intel Integrated + NVIDIA Dedicated GPU), force
 
 ---
 
-## 📁 3. Local Storage for AI Detection Captures
+## 3. Local Storage for AI Detection Captures
 
 Volume storage is configured in `docker-compose.yml`:
 
@@ -89,26 +88,15 @@ volumes:
   - ./detections_output:/app/detections
 ```
 
-### 🎯 Output Behavior:
-1. Docker automatically creates the **`detections_output/`** folder in your repository directory upon container launch.
-2. When the simulator captures frames or detects potholes, annotated images with bounding boxes are saved to:  
-   📁 **`./detections_output/`**
-3. **Web / HTTP Access:** Access processed captures via browser at:  
-   👉 `http://localhost/api/detections/<image_name>.jpg`
+### Output Behaviour:
+1. Docker automatically creates the `detections_output/` folder in your repository directory upon container launch.
+2. When the simulator captures frames or detects potholes, annotated images with bounding boxes are saved to: `./detections_output/`
+3. **Web / HTTP Access:** Access processed captures via browser at: `http://localhost/api/detections/<image_name>.jpg`
 
 ---
 
-## 🛠️ Management Commands
+## Management Commands
 
-- **Check container status & health:**
-  ```bash
-  docker compose ps
-  ```
-- **Stream live backend logs:**
-  ```bash
-  docker compose logs -f yolo-backend
-  ```
-- **Stop services:**
-  ```bash
-  docker compose down
-  ```
+- Check container status and health: `docker compose ps`
+- Stream live backend logs: `docker compose logs -f yolo-backend`
+- Stop services: `docker compose down`

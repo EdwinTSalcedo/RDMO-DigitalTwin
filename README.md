@@ -15,7 +15,7 @@
   <img src="assets/gifs/main.gif" width="60%" alt="Unity digital twin simulator showing UAV pavement inspection under moving traffic" />
 </p>
 
-## Menu
+## Contents
 
 1. [Introduction](#1-introduction)
 2. [Quick Start](#2-quick-start)
@@ -27,52 +27,52 @@
 8. [Repository Structure](#8-repository-structure)
 9. [Citation](#9-citation)
 
+
+
 ## 1. Introduction
 
-This repository contains the Unity digital twin simulator, trained perception models, and Python inference server for traffic-aware UAV pavement monitoring in open-traffic conditions. It provides a controlled environment for studying how autonomous UAV inspection behaves when dynamic vehicles, pedestrians, and temporary occlusions affect road-surface visibility.
+Inspecting urban road infrastructure with drones can be challenging in real-world conditions, where live traffic, pedestrians, and temporary occlusions can interfere with the inspection process. These conditions make it difficult to maintain reliable pavement monitoring without disrupting normal city traffic. To address this challenge, we developed a Unity-based digital twin (DT) framework for evaluating autonomous drone inspection and recovery strategies under dynamic open-traffic conditions. The framework integrates dynamic traffic flows with a multitask YOLOv8 vision module that achieves **0.96 mAP@0.5** and **0.94 macro F1-score** after synthetic-domain fine-tuning. This enables the analysis of trade-offs between inspection coverage, mission duration, and energy consumption before field deployment.
 
-The framework integrates:
+This repository provides the main components of the proposed traffic-aware UAV pavement-monitoring framework, including:
 
 - a Unity urban-road environment with dynamic vehicles and pedestrians;
 - procedurally generated road defects, including Single Crack, Crocodile Crack, and Pothole;
 - autonomous UAV navigation over road segments using Unity NavMesh;
 - adaptive recovery strategies for occluded inspection regions;
 - a multitask YOLOv8n perception model for road defects, pedestrians, and vehicles;
+- a Python inference server for model integration;
 - a batch experiment automator for repeatable UAV recovery-strategy evaluation.
 
 ## 2. Quick Start
 
-### Option A: Docker Web Simulator (Recommended - 1-Click / Command)
+### Option A: Docker Web Simulator
 
 Run the full Digital Twin 3D simulator and YOLOv8 perception backend inside Docker containers with zero manual Python environment setup:
 
-#### 🪟 Windows Setup & Execution
+#### Windows 🪟
 1. **Prerequisites:** Install [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/) with WSL2 backend enabled.
-2. **Start Services:** Run `docker compose up -d` in terminal (or double-click `start_windows.bat`).
-3. **Open Simulator:** Open your web browser and navigate to:  
-   👉 **`http://localhost/`**  
-   *(Verified and compatible with Google Chrome, Microsoft Edge, and Mozilla Firefox).*
-4. **AI Detections Output:** Processed images with bounding boxes and defect labels are automatically saved on your host computer in:  
+2. **Start Services:** Run `docker compose up -d` in terminal.
+3. **Open Simulator:** Open the web browser and navigate to: **`http://localhost/`**  
+4. **AI Detections Output:** Processed images with bounding boxes and defect labels are automatically saved on the host computer in:  
    📁 `./detections_output/`  
    *(or accessible via browser at `http://localhost/api/detections/<image_name>.jpg`).*
-5. **Stop Services:** Run `docker compose down` (or double-click `stop_windows.bat`).
+5. **Stop Services:** Run `docker compose down`.
 
-#### 🐧 Linux Setup & Execution (Ubuntu / Linux Mint / Debian)
+#### Linux 🐧 (Ubuntu / Linux Mint / Debian)
 1. **Prerequisites:** Install Docker and the Docker Compose plugin (`sudo apt install docker-compose-plugin`).
 2. **GPU Acceleration (Optional):** Install [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) for fast GPU inference (~10–15 ms per frame).
-3. **Start Services:** Run:
-   ```bash
-   docker compose up -d
-   ```
-4. **Open Simulator (Browser Recommendation):**  
-   - On Linux systems (especially laptops with hybrid Intel/NVIDIA graphics), **Mozilla Firefox** launched with dedicated GPU provides the smoothest WebGL 2.0 3D hardware-accelerated rendering.
+3. **Start Services:** Run `docker compose up -d`.
+4. **Open Simulator:**  
+   - On Linux systems (especially laptops with hybrid Intel/NVIDIA graphics), **Firefox** launched with dedicated GPU provides the smoothest WebGL 2.0 3D hardware-accelerated rendering.
    - **Launch with GPU:** Right-click the Firefox icon and select *"Run with Dedicated Graphics Card"*, or run via terminal:
      ```bash
      MOZ_ENABLE_WAYLAND=0 __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia firefox http://localhost &
      ```
-5. **AI Detections Output:** Annotated captures are automatically saved on your host machine in:  
+5. **AI Detections Output:** Annotated captures are automatically saved on your machine in:  
    📁 `./detections_output/`
 6. **Stop Services:** Run `docker compose down`.
+
+For advanced Docker options and GPU notes, see [`docker/README.md`](docker/README.md).
 
 ---
 
@@ -302,7 +302,7 @@ Important files:
 
 ## 7. System Hardware Requirements
 
-### Windows desktop simulator (`simulator/`)
+#### Windows desktop simulator (`simulator/`)
 
 - Windows 10 or 11 (64-bit).
 - A desktop or laptop capable of running a Unity 3D project with dynamic agents and NavMesh navigation.
@@ -311,14 +311,14 @@ Important files:
   Download it from the [official Microsoft page](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist).  
   This is the redistributable package used by Unity `6000.2.14f1`, which this project is built with.
 
-### Web simulator (`web/simulator-web/`)
+#### Web simulator (`web/simulator-web/`)
 
-> **Note:** The web build runs entirely inside your browser — no installation is required. However, it still uses the **processing power of your own computer** (CPU and GPU). Performance will depend on your hardware, and weaker machines may experience lower frame rates.
+> **Note:** The web build runs entirely inside your browser — no installation is required. However, it still uses the **processing power of the host computer** (CPU and GPU). 
 
-- Any modern desktop browser with **WebAssembly** and **WebGL 2** support (Chrome, Edge, or Firefox recommended).
+- Any modern desktop browser with **WebAssembly** and **WebGL 2** support.
 - A mid-range or better GPU is recommended for acceptable frame rates.
 - At least **4 GB of RAM** available for the browser tab.
-- To run it locally from the repository, start a static file server:
+- To preview only the WebGL build without Docker, start a static file server:
 
   Windows:
   ```bat
@@ -333,10 +333,10 @@ Important files:
 
   Then open `http://127.0.0.1:8766` in your browser.
 
-### Python inference server
+#### Python inference server
 
 - Python 3.10 or newer.
-- PyTorch, TorchVision, Ultralytics, FastAPI, Uvicorn, OpenCV, and NumPy.
+- Python dependencies installed from `requirements.txt`, including the FastAPI inference stack and YOLO/PyTorch runtime.
 - CUDA is recommended for real-time inference, but CPU execution can be used for debugging.
 
 The experiments reported in the paper were run on a desktop with an AMD Ryzen 5 5600G CPU, NVIDIA GeForce GTX 1050 Ti GPU with 4 GB VRAM, and 16 GB RAM. Detector FPS comparisons were measured on an NVIDIA T4 GPU.
@@ -347,6 +347,7 @@ The experiments reported in the paper were run on a desktop with an AMD Ryzen 5 
 RDMO-DigitalTwin/
 |-- LICENSE.md
 |-- README.md
+|-- docker-compose.yml          # Docker Compose orchestration for WebGL + YOLO API
 |-- requirements.txt
 |-- assets/
 |   |-- gifs/                    # README animations of the project
@@ -355,6 +356,10 @@ RDMO-DigitalTwin/
 |       |-- recorded_experiments/ # Experiment recordings and CSV manifest
 |       |-- uav_view_back.mp4
 |       `-- uav_view_topview.mp4
+|-- docker/
+|   |-- README.md                # Docker deployment guide
+|   |-- backend/                 # FastAPI + PyTorch/YOLO backend container
+|   `-- frontend/                # Nginx container serving the WebGL build
 |-- docs/
 |   |-- DEPLOYMENT.md           # Unity + Python server deployment guide
 |   |-- LOG.md                  # Project experiment log
