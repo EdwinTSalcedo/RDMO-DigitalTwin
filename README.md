@@ -43,7 +43,7 @@ This repository provides the main components of the proposed traffic-aware UAV p
 - a Python inference server for model integration;
 - a batch experiment automator for repeatable UAV recovery-strategy evaluation.
 
-> 🏆 **Recognition:** [Best Application Paper Finalist Award — DTPI 2026](https://drive.google.com/drive/folders/1cnm_0_Q9pUQIFrB0eRPn9e5Bm2sYvHbW)
+> This work was recognised with the 🏆 **[Best Application Paper Finalist Award — DTPI 2026](https://drive.google.com/drive/folders/1cnm_0_Q9pUQIFrB0eRPn9e5Bm2sYvHbW)**
 
 ## 2. Quick Start
 
